@@ -8,13 +8,20 @@ import Dashboard from "./pages/Dashboard";
 import UsersPage from "./pages/UsersPage";
 import AlertsPage from "./pages/AlertsPage";
 import Analytics from "./pages/Analytics";
+import InvestigationPage from "./pages/InvestigationPage";
+import ReportsPage from "./pages/ReportsPage";
+import DataManagementPage from "./pages/DataManagementPage";
+import SearchPage from "./pages/SearchPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
+import { Helmet } from "react-helmet";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <Helmet titleTemplate="%s | AnomalyGuard" defaultTitle="AnomalyGuard - UEBA Platform" />
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -23,13 +30,11 @@ const App = () => (
           <Route path="/users" element={<UsersPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/analytics" element={<Analytics />} />
-          
-          {/* Future pages */}
-          <Route path="/investigation" element={<NotFound />} />
-          <Route path="/reports" element={<NotFound />} />
-          <Route path="/data" element={<NotFound />} />
-          <Route path="/search" element={<NotFound />} />
-          <Route path="/settings" element={<NotFound />} />
+          <Route path="/investigation" element={<InvestigationPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/data" element={<DataManagementPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
