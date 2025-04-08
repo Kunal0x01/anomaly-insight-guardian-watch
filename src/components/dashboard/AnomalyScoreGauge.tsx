@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 interface AnomalyScoreGaugeProps {
   value: number;
@@ -30,14 +31,24 @@ const AnomalyScoreGauge = ({ value, title, description, className }: AnomalyScor
     return 'High Risk';
   };
 
+  // Get icon based on risk level
+  const getIcon = () => {
+    if (normalizedValue < 0.3) return <ShieldCheck className="w-6 h-6 text-anomaly-low" />;
+    if (normalizedValue < 0.7) return <Shield className="w-6 h-6 text-anomaly-medium" />;
+    return <ShieldAlert className="w-6 h-6 text-anomaly-high" />;
+  };
+
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
+    <Card className={cn(className, "cyber-border backdrop-blur-sm scanning-effect")}>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div>
+          <CardTitle>{title}</CardTitle>
+          {description && <CardDescription>{description}</CardDescription>}
+        </div>
+        {getIcon()}
       </CardHeader>
       <CardContent className="flex flex-col items-center">
-        <div className="relative w-40 h-24 mb-4">
+        <div className="relative w-40 h-24 mb-6">
           {/* Gauge background */}
           <div className="absolute w-full h-full overflow-hidden">
             <div className="w-40 h-40 border-[16px] border-secondary rounded-full"></div>
@@ -58,14 +69,14 @@ const AnomalyScoreGauge = ({ value, title, description, className }: AnomalyScor
             className="absolute top-0 left-0 w-full h-24 flex justify-center"
             style={{ transform: `rotate(${angle}deg)`, transformOrigin: 'center bottom' }}
           >
-            <div className="w-1 h-20 bg-white rounded-full"></div>
+            <div className="w-1 h-20 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.7)]"></div>
           </div>
           
           {/* Center point */}
-          <div className="absolute bottom-0 left-1/2 w-4 h-4 bg-white rounded-full -translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-1/2 w-4 h-4 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary-rgb),0.7)] -translate-x-1/2"></div>
         </div>
         
-        <div className="text-center">
+        <div className="text-center border-t border-border/30 pt-3 w-full">
           <p className={cn("text-2xl font-bold", getColor())}>{Math.round(normalizedValue * 100)}%</p>
           <p className={cn("text-sm font-medium", getColor())}>{getRiskLevel()}</p>
         </div>
