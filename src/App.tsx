@@ -21,7 +21,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Helmet titleTemplate="%s | AnomalyGuard" defaultTitle="AnomalyGuard - UEBA Platform" />
+      <Helmet titleTemplate="%s | Open UEBA" defaultTitle="Open UEBA - User and Entity Behavior Analytics" />
       <Toaster />
       <Sonner />
       <BrowserRouter>

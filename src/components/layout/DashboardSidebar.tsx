@@ -62,8 +62,12 @@ const DashboardSidebar = () => {
   return (
     <div className="w-64 h-screen bg-sidebar flex flex-col border-r border-sidebar-border">
       <div className="p-4 flex items-center gap-3">
-        <Shield className="h-8 w-8 text-primary" />
-        <h1 className="text-xl font-semibold text-sidebar-foreground">Anomaly<span className="text-primary">Guard</span></h1>
+        <img 
+          src="/lovable-uploads/6e782c53-fa7e-4c3f-aead-07f8c92884a5.png" 
+          alt="Open UEBA Logo" 
+          className="h-10 w-auto" 
+        />
+        <h1 className="text-xl font-semibold text-sidebar-foreground">Open<span className="text-primary">UEBA</span></h1>
       </div>
 
       <div className="flex flex-col flex-1 px-2 py-4 gap-1 overflow-auto">
