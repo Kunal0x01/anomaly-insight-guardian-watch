@@ -45,7 +45,7 @@ const UserRiskScoreCard: React.FC<UserRiskScoreCardProps> = ({ users, className 
             <BarChart
               data={sortedUsers}
               layout="vertical"
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis 
@@ -57,8 +57,8 @@ const UserRiskScoreCard: React.FC<UserRiskScoreCardProps> = ({ users, className 
               <YAxis 
                 type="category" 
                 dataKey="name" 
-                width={100}
-                tick={{ fill: 'rgba(255,255,255,0.6)' }} 
+                width={120}
+                tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 12 }} 
                 stroke="rgba(255,255,255,0.1)"
               />
               <Tooltip
@@ -105,12 +105,12 @@ const UserRiskScoreCard: React.FC<UserRiskScoreCardProps> = ({ users, className 
                   {user.trend > 0 ? (
                     <>
                       <TrendingUp className="h-3 w-3 text-anomaly-high" />
-                      <span className="text-anomaly-high">+{user.trend * 100}%</span>
+                      <span className="text-anomaly-high">+{Math.abs(user.trend * 100).toFixed(0)}%</span>
                     </>
                   ) : (
                     <>
                       <TrendingDown className="h-3 w-3 text-anomaly-low" />
-                      <span className="text-anomaly-low">{user.trend * 100}%</span>
+                      <span className="text-anomaly-low">{Math.abs(user.trend * 100).toFixed(0)}%</span>
                     </>
                   )}
                 </div>

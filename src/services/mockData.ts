@@ -141,7 +141,7 @@ export const alertsData = [
     description: "User logged in outside normal working hours from unrecognized IP address",
     severity: "high",
     timestamp: "Today, 10:23 AM",
-    entity: "john.doe@example.com",
+    entity: "user1",
     status: "new"
   },
   {
@@ -150,7 +150,7 @@ export const alertsData = [
     description: "User accessed 230 files in 1 hour, significantly above baseline of 85 files",
     severity: "high",
     timestamp: "Today, 3:15 PM",
-    entity: "sarah.smith@example.com",
+    entity: "user2",
     status: "investigating"
   },
   {
@@ -159,7 +159,7 @@ export const alertsData = [
     description: "17 failed login attempts detected from the same IP address",
     severity: "medium",
     timestamp: "Today, 10:05 AM",
-    entity: "admin.user@example.com",
+    entity: "user3",
     status: "resolved"
   },
   {
@@ -168,7 +168,7 @@ export const alertsData = [
     description: "User accessed financial reports outside normal permission pattern",
     severity: "medium",
     timestamp: "Yesterday, 4:32 PM",
-    entity: "finance.analyst@example.com",
+    entity: "user4",
     status: "investigating"
   },
   {
@@ -177,7 +177,7 @@ export const alertsData = [
     description: "User account locked after multiple failed login attempts",
     severity: "low",
     timestamp: "Yesterday, 11:18 AM",
-    entity: "intern.user@example.com",
+    entity: "user5",
     status: "resolved"
   },
   {
@@ -186,7 +186,7 @@ export const alertsData = [
     description: "User deleted 47 files in 5 minutes, potential data destruction",
     severity: "high",
     timestamp: "Apr 6, 2025 - 9:40 AM",
-    entity: "developer.lead@example.com",
+    entity: "user1",
     status: "dismissed"
   }
 ] as any;
@@ -195,8 +195,8 @@ export const alertsData = [
 export const usersData = [
   {
     id: "user-001",
-    name: "John Doe",
-    email: "john.doe@example.com",
+    name: "user1",
+    email: "user1@example.com",
     department: "IT Administration",
     role: "System Administrator",
     riskScore: 0.75,
@@ -206,8 +206,8 @@ export const usersData = [
   },
   {
     id: "user-002",
-    name: "Sarah Smith",
-    email: "sarah.smith@example.com",
+    name: "user2",
+    email: "user2@example.com",
     department: "Engineering",
     role: "Lead Developer",
     riskScore: 0.85,
@@ -217,8 +217,8 @@ export const usersData = [
   },
   {
     id: "user-003",
-    name: "Admin User",
-    email: "admin.user@example.com",
+    name: "user3",
+    email: "user3@example.com",
     department: "IT Security",
     role: "Security Analyst",
     riskScore: 0.42,
@@ -228,8 +228,8 @@ export const usersData = [
   },
   {
     id: "user-004",
-    name: "Finance Analyst",
-    email: "finance.analyst@example.com",
+    name: "user4",
+    email: "user4@example.com",
     department: "Finance",
     role: "Senior Analyst",
     riskScore: 0.55,
@@ -239,8 +239,8 @@ export const usersData = [
   },
   {
     id: "user-005",
-    name: "Intern User",
-    email: "intern.user@example.com",
+    name: "user5",
+    email: "user5@example.com",
     department: "Marketing",
     role: "Marketing Intern",
     riskScore: 0.25,
@@ -252,11 +252,11 @@ export const usersData = [
 
 // Top entities with highest risk scores
 export const topRiskyEntities = [
-  { id: "user-002", name: "Sarah Smith", department: "Engineering", riskScore: 0.85, trend: 0.12 },
-  { id: "user-001", name: "John Doe", department: "IT Administration", riskScore: 0.75, trend: 0.08 },
-  { id: "user-004", name: "Finance Analyst", department: "Finance", riskScore: 0.55, trend: -0.03 },
-  { id: "user-003", name: "Admin User", department: "IT Security", riskScore: 0.42, trend: -0.05 },
-  { id: "user-005", name: "Intern User", department: "Marketing", riskScore: 0.25, trend: 0.01 }
+  { id: "user-002", name: "user2", department: "Engineering", riskScore: 0.85, trend: 0.12 },
+  { id: "user-001", name: "user1", department: "IT Administration", riskScore: 0.75, trend: 0.08 },
+  { id: "user-004", name: "user4", department: "Finance", riskScore: 0.55, trend: -0.03 },
+  { id: "user-003", name: "user3", department: "IT Security", riskScore: 0.42, trend: -0.05 },
+  { id: "user-005", name: "user5", department: "Marketing", riskScore: 0.25, trend: 0.01 }
 ];
 
 // Mock dashboard stats
@@ -290,7 +290,7 @@ export const firewallLogs: FirewallLog[] = [
   { date: "9/14/2023", time: "17:30:23", user: "user3", dstport: 443, duration: 246, sentbyte: 4928, rcvdbyte: 17525, sentpkt: 28, rcvdpkt: 26 },
   { date: "9/14/2023", time: "17:29:56", user: "user4", dstport: 443, duration: 241, sentbyte: 2367, rcvdbyte: 3046, sentpkt: 20, rcvdpkt: 21 },
   { date: "9/14/2023", time: "17:30:23", user: "user5", dstport: 443, duration: 157, sentbyte: 11420, rcvdbyte: 28991, sentpkt: 27, rcvdpkt: 49 },
-  { date: "9/14/2023", time: "17:30:05", user: "user1", dstport: 443, duration: 241, sentbyte: 5660, rcvdbyte: 2279, sentpkt: 16, rcvdpkt: 17 },
+  { date: "9/14/2023", time: "17:30:05", user: "user1", dstport: 443, duration: 5660, rcvdbyte: 2279, sentpkt: 16, rcvdpkt: 17 },
   { date: "9/14/2023", time: "17:30:05", user: "user2", dstport: 53, duration: 181, sentbyte: 66, rcvdbyte: 82, sentpkt: 1, rcvdpkt: 1 },
   { date: "9/14/2023", time: "17:29:56", user: "user3", dstport: 443, duration: 2944, sentbyte: 7185, rcvdbyte: 7919, sentpkt: 31, rcvdpkt: 45 },
   { date: "9/14/2023", time: "17:30:05", user: "user4", dstport: 53, duration: 182, sentbyte: 69, rcvdbyte: 219, sentpkt: 1, rcvdpkt: 1 },
@@ -306,7 +306,7 @@ export const firewallLogs: FirewallLog[] = [
 export const enhancedUserRiskData = [
   { 
     id: "user-001", 
-    name: "John Doe", 
+    name: "user1", 
     department: "IT Administration",
     riskScore: 0.85, 
     trend: 0.15,
@@ -320,7 +320,7 @@ export const enhancedUserRiskData = [
   },
   { 
     id: "user-002", 
-    name: "Sarah Smith", 
+    name: "user2", 
     department: "Engineering",
     riskScore: 0.92, 
     trend: 0.08,
@@ -334,7 +334,7 @@ export const enhancedUserRiskData = [
   },
   { 
     id: "user-003", 
-    name: "Admin User", 
+    name: "user3", 
     department: "IT Security",
     riskScore: 0.42, 
     trend: -0.05,
@@ -348,7 +348,7 @@ export const enhancedUserRiskData = [
   },
   { 
     id: "user-004", 
-    name: "Finance Analyst", 
+    name: "user4", 
     department: "Finance",
     riskScore: 0.68, 
     trend: 0.12,
@@ -362,7 +362,7 @@ export const enhancedUserRiskData = [
   },
   { 
     id: "user-005", 
-    name: "Intern User", 
+    name: "user5", 
     department: "Marketing",
     riskScore: 0.25, 
     trend: -0.1,
