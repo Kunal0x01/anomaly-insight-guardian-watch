@@ -1,4 +1,3 @@
-
 // Mock data for the UEBA dashboard
 
 // Login activity data
@@ -243,3 +242,34 @@ export const dashboardStats = {
   lowRiskUsers: 210,
   averageRiskScore: 0.22
 };
+
+// Firewall logs data
+export interface FirewallLog {
+  date: string;
+  time: string;
+  user: string;
+  dstport: number;
+  duration: number;
+  sentbyte: number;
+  rcvdbyte: number;
+  sentpkt: number;
+  rcvdpkt: number;
+}
+
+export const firewallLogs: FirewallLog[] = [
+  { date: "9/14/2023", time: "17:30:23", user: "user1", dstport: 443, duration: 131, sentbyte: 2517, rcvdbyte: 7529, sentpkt: 8, rcvdpkt: 10 },
+  { date: "9/14/2023", time: "17:30:05", user: "user2", dstport: 443, duration: 3375, sentbyte: 7074, rcvdbyte: 62519, sentpkt: 106, rcvdpkt: 160 },
+  { date: "9/14/2023", time: "17:30:23", user: "user3", dstport: 443, duration: 246, sentbyte: 4928, rcvdbyte: 17525, sentpkt: 28, rcvdpkt: 26 },
+  { date: "9/14/2023", time: "17:29:56", user: "user4", dstport: 443, duration: 241, sentbyte: 2367, rcvdbyte: 3046, sentpkt: 20, rcvdpkt: 21 },
+  { date: "9/14/2023", time: "17:30:23", user: "user5", dstport: 443, duration: 157, sentbyte: 11420, rcvdbyte: 28991, sentpkt: 27, rcvdpkt: 49 },
+  { date: "9/14/2023", time: "17:30:05", user: "user1", dstport: 443, duration: 241, sentbyte: 5660, rcvdbyte: 2279, sentpkt: 16, rcvdpkt: 17 },
+  { date: "9/14/2023", time: "17:30:05", user: "user2", dstport: 53, duration: 181, sentbyte: 66, rcvdbyte: 82, sentpkt: 1, rcvdpkt: 1 },
+  { date: "9/14/2023", time: "17:29:56", user: "user3", dstport: 443, duration: 2944, sentbyte: 7185, rcvdbyte: 7919, sentpkt: 31, rcvdpkt: 45 },
+  { date: "9/14/2023", time: "17:30:05", user: "user4", dstport: 53, duration: 182, sentbyte: 69, rcvdbyte: 219, sentpkt: 1, rcvdpkt: 1 },
+  { date: "9/14/2023", time: "17:30:05", user: "user5", dstport: 443, duration: 68, sentbyte: 2449, rcvdbyte: 8203, sentpkt: 15, rcvdpkt: 16 },
+  { date: "9/14/2023", time: "17:30:23", user: "user1", dstport: 443, duration: 3407, sentbyte: 588186, rcvdbyte: 433044, sentpkt: 1993, rcvdpkt: 3187 },
+  { date: "9/14/2023", time: "17:29:56", user: "user2", dstport: 443, duration: 185, sentbyte: 7052, rcvdbyte: 16302, sentpkt: 19, rcvdpkt: 20 },
+  { date: "9/14/2023", time: "17:29:56", user: "user3", dstport: 443, duration: 6, sentbyte: 3103, rcvdbyte: 5591, sentpkt: 13, rcvdpkt: 14 },
+  { date: "9/14/2023", time: "17:29:56", user: "user4", dstport: 443, duration: 7, sentbyte: 6215, rcvdbyte: 1163840, sentpkt: 121, rcvdpkt: 916 },
+  { date: "9/14/2023", time: "17:29:56", user: "user5", dstport: 443, duration: 11, sentbyte: 2495, rcvdbyte: 99619, sentpkt: 31, rcvdpkt: 93 }
+];

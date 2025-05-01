@@ -1,12 +1,13 @@
 
 import React from "react";
-import { BarChart2, FileText, Search, Shield, ShieldAlert, User, Users } from "lucide-react";
+import { BarChart2, FileText, Shield, ShieldAlert, User, Users } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import StatCard from "@/components/dashboard/StatCard";
 import AnomalyTrend from "@/components/dashboard/AnomalyTrend";
 import ActivityHeatmap from "@/components/dashboard/ActivityHeatmap";
 import AnomalyScoreGauge from "@/components/dashboard/AnomalyScoreGauge";
 import AlertList from "@/components/dashboard/AlertList";
+import FirewallLogsTable from "@/components/dashboard/FirewallLogsTable";
 import { useNavigate } from "react-router-dom";
 import { 
   alertsData, 
@@ -17,7 +18,8 @@ import {
   daysLabels, 
   loginActivityData, 
   loginHeatmapData, 
-  topRiskyEntities 
+  topRiskyEntities,
+  firewallLogs
 } from "@/services/mockData";
 
 const Dashboard = () => {
@@ -86,6 +88,11 @@ const Dashboard = () => {
           gradientFrom="rgba(239, 68, 68, 0.2)"
           gradientTo="rgba(239, 68, 68, 0)"
         />
+      </div>
+
+      {/* Firewall Logs Table */}
+      <div className="mb-6">
+        <FirewallLogsTable logs={firewallLogs} />
       </div>
 
       {/* Alerts and user activity section */}
