@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { BarChart2, FileText, Shield, ShieldAlert, User, Users } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import StatCard from "@/components/dashboard/StatCard";
@@ -10,6 +10,10 @@ import AlertList from "@/components/dashboard/AlertList";
 import FirewallLogsTable from "@/components/dashboard/FirewallLogsTable";
 import NetworkActivityGraph from "@/components/dashboard/NetworkActivityGraph";
 import UserRiskScoreCard from "@/components/dashboard/UserRiskScoreCard";
+import LogFileUploader from "@/components/dashboard/LogFileUploader";
+import FileAccessVisualization from "@/components/dashboard/FileAccessVisualization";
+import LogonActivityVisualization from "@/components/dashboard/LogonActivityVisualization";
+import NetworkActivityVisualization from "@/components/dashboard/NetworkActivityVisualization";
 import { useNavigate } from "react-router-dom";
 import { 
   alertsData, 
@@ -23,14 +27,26 @@ import {
   enhancedUserRiskData,
   topRiskyEntities,
   firewallLogs,
-  networkActivityData
+  networkActivityData,
+  uploadedFileAccessLogs,
+  uploadedLogonActivityLogs,
+  uploadedNetworkActivityLogs
 } from "@/services/mockData";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [hasFileAccess, setHasFileAccess] = useState(false);
+  const [hasLogonActivity, setHasLogonActivity] = useState(false);
+  const [hasNetworkActivity, setHasNetworkActivity] = useState(false);
 
   const handleViewAllAlerts = () => {
     navigate("/alerts");
+  };
+
+  const handleLogsProcessed = (fileAccessCount: number, logonActivityCount: number, networkActivityCount: number) => {
+    setHasFileAccess(fileAccessCount > 0);
+    setHasLogonActivity(logonActivityCount > 0);
+    setHasNetworkActivity(networkActivityCount > 0);
   };
 
   return (
@@ -44,6 +60,28 @@ const Dashboard = () => {
           <div className="text-sm text-muted-foreground">Last updated: April 7, 2025 - 16:45</div>
         </div>
       </div>
+
+      {/* Log File Upload */}
+      <div className="mb-6">
+        <LogFileUploader onLogsProcessed={handleLogsProcessed} />
+      </div>
+
+      {/* Uploaded Data Visualizations */}
+      {(hasFileAccess || hasLogonActivity || hasNetworkActivity) && (
+        <div className="grid grid-cols-1 gap-6 mb-6">
+          {hasFileAccess && (
+            <FileAccessVisualization logs={uploadedFileAccessLogs} />
+          )}
+          
+          {hasLogonActivity && (
+            <LogonActivityVisualization logs={uploadedLogonActivityLogs} />
+          )}
+          
+          {hasNetworkActivity && (
+            <NetworkActivityVisualization logs={uploadedNetworkActivityLogs} />
+          )}
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

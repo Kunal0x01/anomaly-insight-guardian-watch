@@ -290,7 +290,7 @@ export const firewallLogs: FirewallLog[] = [
   { date: "9/14/2023", time: "17:30:23", user: "user3", dstport: 443, duration: 246, sentbyte: 4928, rcvdbyte: 17525, sentpkt: 28, rcvdpkt: 26 },
   { date: "9/14/2023", time: "17:29:56", user: "user4", dstport: 443, duration: 241, sentbyte: 2367, rcvdbyte: 3046, sentpkt: 20, rcvdpkt: 21 },
   { date: "9/14/2023", time: "17:30:23", user: "user5", dstport: 443, duration: 157, sentbyte: 11420, rcvdbyte: 28991, sentpkt: 27, rcvdpkt: 49 },
-  { date: "9/14/2023", time: "17:30:05", user: "user1", dstport: 443, duration: 5660, rcvdbyte: 2279, sentpkt: 16, rcvdpkt: 17 },
+  { date: "9/14/2023", time: "17:30:05", user: "user1", dstport: 443, duration: 157, sentbyte: 5660, rcvdbyte: 2279, sentpkt: 16, rcvdpkt: 17 },
   { date: "9/14/2023", time: "17:30:05", user: "user2", dstport: 53, duration: 181, sentbyte: 66, rcvdbyte: 82, sentpkt: 1, rcvdpkt: 1 },
   { date: "9/14/2023", time: "17:29:56", user: "user3", dstport: 443, duration: 2944, sentbyte: 7185, rcvdbyte: 7919, sentpkt: 31, rcvdpkt: 45 },
   { date: "9/14/2023", time: "17:30:05", user: "user4", dstport: 53, duration: 182, sentbyte: 69, rcvdbyte: 219, sentpkt: 1, rcvdpkt: 1 },
@@ -379,4 +379,65 @@ export const enhancedUserRiskData = [
 // Calculate weighted risk scores
 export const calculateUserRiskScore = (riskFactors: Array<{factor: string, weight: number, score: number}>) => {
   return riskFactors.reduce((total, factor) => total + (factor.weight * factor.score), 0);
+};
+
+// Log type interfaces for JSON upload functionality
+export interface FileAccessLog {
+  Type: "File Access";
+  Details: {
+    Hostname: string;
+    Date: string;
+    "Time Period": number;
+    Day: number;
+    "Number of Files Accessed": number;
+  };
+}
+
+export interface LogonActivityLog {
+  Type: "Logon Activity";
+  Details: {
+    Hostname: string;
+    Date: string;
+    "Time Period": number;
+    Day: number;
+    "No. of Logins": number;
+    "No. of Logouts": number;
+    "No. of Failed Login Attempts": number;
+    "No. of Account Lockout Attempts": number;
+  };
+}
+
+export interface NetworkActivityLog {
+  Type: "Network Activity";
+  Details: {
+    date: string;
+    time: string;
+    user: string;
+    dstport: number;
+    duration: number;
+    sentbyte: number;
+    rcvdbyte: number;
+    sentpkt: number;
+    rcvdpkt: number;
+  };
+}
+
+export type LogEntry = FileAccessLog | LogonActivityLog | NetworkActivityLog;
+
+// Initialize empty arrays for uploaded log data
+export let uploadedFileAccessLogs: FileAccessLog[] = [];
+export let uploadedLogonActivityLogs: LogonActivityLog[] = [];
+export let uploadedNetworkActivityLogs: NetworkActivityLog[] = [];
+
+// Function to process and categorize uploaded logs
+export const processUploadedLogs = (logs: LogEntry[]) => {
+  uploadedFileAccessLogs = logs.filter((log): log is FileAccessLog => log.Type === "File Access");
+  uploadedLogonActivityLogs = logs.filter((log): log is LogonActivityLog => log.Type === "Logon Activity");
+  uploadedNetworkActivityLogs = logs.filter((log): log is NetworkActivityLog => log.Type === "Network Activity");
+  
+  return {
+    fileAccessLogs: uploadedFileAccessLogs,
+    logonActivityLogs: uploadedLogonActivityLogs,
+    networkActivityLogs: uploadedNetworkActivityLogs
+  };
 };

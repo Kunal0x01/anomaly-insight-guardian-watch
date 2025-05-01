@@ -45,7 +45,7 @@ const UserRiskScoreCard: React.FC<UserRiskScoreCardProps> = ({ users, className 
             <BarChart
               data={sortedUsers}
               layout="vertical"
-              margin={{ top: 5, right: 30, left: 50, bottom: 5 }}
+              margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
               <XAxis 
@@ -57,7 +57,7 @@ const UserRiskScoreCard: React.FC<UserRiskScoreCardProps> = ({ users, className 
               <YAxis 
                 type="category" 
                 dataKey="name" 
-                width={120}
+                width={110}
                 tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 12 }} 
                 stroke="rgba(255,255,255,0.1)"
               />
