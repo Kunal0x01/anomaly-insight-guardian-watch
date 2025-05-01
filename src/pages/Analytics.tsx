@@ -1,10 +1,13 @@
 
-import React from "react";
+import React, { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AnomalyTrend from "@/components/dashboard/AnomalyTrend";
-import { fileAccessData, failedLoginData, loginActivityData } from "@/services/mockData";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from "recharts";
+import NetworkActivityGraph from "@/components/dashboard/NetworkActivityGraph";
+import UserRiskFactors from "@/components/dashboard/UserRiskFactors";
+import { fileAccessData, failedLoginData, loginActivityData, enhancedUserRiskData, networkActivityData } from "@/services/mockData";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Mock data for the algorithm performance
 const algorithmPerformanceData = [
@@ -26,6 +29,10 @@ const anomalyDistributionData = [
 ];
 
 const Analytics = () => {
+  const [selectedUser, setSelectedUser] = useState(enhancedUserRiskData[0].id);
+  
+  const selectedUserData = enhancedUserRiskData.find(user => user.id === selectedUser) || enhancedUserRiskData[0];
+
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
@@ -43,12 +50,10 @@ const Analytics = () => {
           description="Pattern visualization with anomaly detection"
           data={loginActivityData}
         />
-        <AnomalyTrend
-          title="Failed Login Analysis"
-          description="Failed login attempts with anomaly scores"
-          data={failedLoginData}
-          gradientFrom="rgba(239, 68, 68, 0.2)"
-          gradientTo="rgba(239, 68, 68, 0)"
+        <NetworkActivityGraph
+          title="Network Traffic Analysis"
+          description="Sent and received bytes with anomaly detection"
+          data={networkActivityData}
         />
       </div>
 
@@ -78,6 +83,7 @@ const Analytics = () => {
                   <YAxis 
                     dataKey="feature" 
                     type="category" 
+                    width={100}
                     tick={{ fill: 'rgba(255,255,255,0.6)' }} 
                     stroke="rgba(255,255,255,0.1)"
                   />
@@ -93,7 +99,17 @@ const Analytics = () => {
                     dataKey="importance" 
                     fill="hsl(var(--primary))" 
                     radius={[0, 4, 4, 0]}
-                  />
+                  >
+                    {algorithmPerformanceData.map((entry, index) => {
+                      const value = entry.importance;
+                      return (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={value > 0.6 ? "#ef4444" : value > 0.3 ? "#f97316" : "#3b82f6"} 
+                        />
+                      );
+                    })}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -133,12 +149,54 @@ const Analytics = () => {
                   />
                   <Bar 
                     dataKey="count" 
-                    fill="hsl(var(--primary))" 
                     radius={[4, 4, 0, 0]}
-                  />
+                  >
+                    {anomalyDistributionData.map((entry, index) => {
+                      const value = entry.count;
+                      return (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={value > 10 ? "#ef4444" : value > 5 ? "#f97316" : "#3b82f6"} 
+                        />
+                      );
+                    })}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>User Risk Analysis</CardTitle>
+              <CardDescription>Detailed breakdown of risk factors by user</CardDescription>
+            </div>
+            <Select 
+              value={selectedUser} 
+              onValueChange={setSelectedUser}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select User" />
+              </SelectTrigger>
+              <SelectContent>
+                {enhancedUserRiskData.map(user => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent>
+            <UserRiskFactors
+              userId={selectedUserData.id}
+              userName={selectedUserData.name}
+              factors={selectedUserData.riskFactors}
+            />
           </CardContent>
         </Card>
       </div>

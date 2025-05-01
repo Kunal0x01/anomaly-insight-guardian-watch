@@ -8,6 +8,8 @@ import ActivityHeatmap from "@/components/dashboard/ActivityHeatmap";
 import AnomalyScoreGauge from "@/components/dashboard/AnomalyScoreGauge";
 import AlertList from "@/components/dashboard/AlertList";
 import FirewallLogsTable from "@/components/dashboard/FirewallLogsTable";
+import NetworkActivityGraph from "@/components/dashboard/NetworkActivityGraph";
+import UserRiskScoreCard from "@/components/dashboard/UserRiskScoreCard";
 import { useNavigate } from "react-router-dom";
 import { 
   alertsData, 
@@ -17,9 +19,11 @@ import {
   hoursLabels, 
   daysLabels, 
   loginActivityData, 
-  loginHeatmapData, 
+  loginHeatmapData,
+  enhancedUserRiskData,
   topRiskyEntities,
-  firewallLogs
+  firewallLogs,
+  networkActivityData
 } from "@/services/mockData";
 
 const Dashboard = () => {
@@ -74,7 +78,7 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Charts row */}
+      {/* Charts row - User Login and Failed Login Activities */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <AnomalyTrend
           title="Login Activity"
@@ -90,12 +94,22 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* Network Activity Graph and User Risk Score Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <NetworkActivityGraph
+          title="Network Traffic Analysis"
+          description="Sent and received bytes with anomaly detection"
+          data={networkActivityData}
+        />
+        <UserRiskScoreCard users={enhancedUserRiskData} />
+      </div>
+
       {/* Firewall Logs Table */}
       <div className="mb-6">
         <FirewallLogsTable logs={firewallLogs} />
       </div>
 
-      {/* Alerts and user activity section */}
+      {/* Alerts and System Risk */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
           <AlertList 
@@ -112,7 +126,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Heatmap section */}
+      {/* Heatmap and File Access Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <ActivityHeatmap

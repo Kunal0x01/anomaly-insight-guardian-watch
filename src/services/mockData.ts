@@ -84,6 +84,34 @@ export const fileAccessData = [
   { name: "23:00", value: 30, anomalyScore: 0.05 },
 ];
 
+// Network traffic data with anomalies
+export const networkActivityData = [
+  { timestamp: "00:00", sentBytes: 2517, receivedBytes: 7529, anomalyScore: 0.1 },
+  { timestamp: "01:00", sentBytes: 7074, receivedBytes: 12519, anomalyScore: 0.2 },
+  { timestamp: "02:00", sentBytes: 4928, receivedBytes: 17525, anomalyScore: 0.05 },
+  { timestamp: "03:00", sentBytes: 2367, receivedBytes: 3046, anomalyScore: 0.1 },
+  { timestamp: "04:00", sentBytes: 5420, receivedBytes: 8991, anomalyScore: 0.3 },
+  { timestamp: "05:00", sentBytes: 5660, receivedBytes: 2279, anomalyScore: 0.1 },
+  { timestamp: "06:00", sentBytes: 7185, receivedBytes: 7919, anomalyScore: 0.2 },
+  { timestamp: "07:00", sentBytes: 10317, receivedBytes: 13663, anomalyScore: 0.3 },
+  { timestamp: "08:00", sentBytes: 20449, receivedBytes: 48203, anomalyScore: 0.4 },
+  { timestamp: "09:00", sentBytes: 35660, receivedBytes: 52279, anomalyScore: 0.2 },
+  { timestamp: "10:00", sentBytes: 588186, receivedBytes: 433044, anomalyScore: 0.95 },
+  { timestamp: "11:00", sentBytes: 37052, receivedBytes: 56302, anomalyScore: 0.3 },
+  { timestamp: "12:00", sentBytes: 33103, receivedBytes: 45591, anomalyScore: 0.1 },
+  { timestamp: "13:00", sentBytes: 26215, receivedBytes: 1163840, anomalyScore: 0.9 },
+  { timestamp: "14:00", sentBytes: 42495, receivedBytes: 99619, anomalyScore: 0.75 },
+  { timestamp: "15:00", sentBytes: 29522, receivedBytes: 27909, anomalyScore: 0.1 },
+  { timestamp: "16:00", sentBytes: 32089, receivedBytes: 45458, anomalyScore: 0.2 },
+  { timestamp: "17:00", sentBytes: 167079, receivedBytes: 152449, anomalyScore: 0.85 },
+  { timestamp: "18:00", sentBytes: 33634, receivedBytes: 44428, anomalyScore: 0.3 },
+  { timestamp: "19:00", sentBytes: 22669, receivedBytes: 33184, anomalyScore: 0.2 },
+  { timestamp: "20:00", sentBytes: 19650, receivedBytes: 13793, anomalyScore: 0.1 },
+  { timestamp: "21:00", sentBytes: 11637, receivedBytes: 11280, anomalyScore: 0.05 },
+  { timestamp: "22:00", sentBytes: 9154, receivedBytes: 9379, anomalyScore: 0.1 },
+  { timestamp: "23:00", sentBytes: 7317, receivedBytes: 8663, anomalyScore: 0.2 },
+];
+
 // Heatmap data - User login activity by hour and day
 export const loginHeatmapData = [
   // Hours as columns, days as rows - values between 0 and 1
@@ -273,3 +301,82 @@ export const firewallLogs: FirewallLog[] = [
   { date: "9/14/2023", time: "17:29:56", user: "user4", dstport: 443, duration: 7, sentbyte: 6215, rcvdbyte: 1163840, sentpkt: 121, rcvdpkt: 916 },
   { date: "9/14/2023", time: "17:29:56", user: "user5", dstport: 443, duration: 11, sentbyte: 2495, rcvdbyte: 99619, sentpkt: 31, rcvdpkt: 93 }
 ];
+
+// Enhanced user risk data with calculated risk factors
+export const enhancedUserRiskData = [
+  { 
+    id: "user-001", 
+    name: "John Doe", 
+    department: "IT Administration",
+    riskScore: 0.85, 
+    trend: 0.15,
+    riskFactors: [
+      { factor: "Unusual login times", weight: 0.3, score: 0.75 },
+      { factor: "Elevated privileges", weight: 0.25, score: 0.9 },
+      { factor: "File access volume", weight: 0.2, score: 0.8 },
+      { factor: "Network traffic", weight: 0.15, score: 0.95 },
+      { factor: "Failed logins", weight: 0.1, score: 0.7 },
+    ]
+  },
+  { 
+    id: "user-002", 
+    name: "Sarah Smith", 
+    department: "Engineering",
+    riskScore: 0.92, 
+    trend: 0.08,
+    riskFactors: [
+      { factor: "Unusual login times", weight: 0.3, score: 0.9 },
+      { factor: "Elevated privileges", weight: 0.25, score: 0.95 },
+      { factor: "File access volume", weight: 0.2, score: 0.95 },
+      { factor: "Network traffic", weight: 0.15, score: 0.85 },
+      { factor: "Failed logins", weight: 0.1, score: 0.9 },
+    ]
+  },
+  { 
+    id: "user-003", 
+    name: "Admin User", 
+    department: "IT Security",
+    riskScore: 0.42, 
+    trend: -0.05,
+    riskFactors: [
+      { factor: "Unusual login times", weight: 0.3, score: 0.4 },
+      { factor: "Elevated privileges", weight: 0.25, score: 0.9 },
+      { factor: "File access volume", weight: 0.2, score: 0.2 },
+      { factor: "Network traffic", weight: 0.15, score: 0.25 },
+      { factor: "Failed logins", weight: 0.1, score: 0.1 },
+    ]
+  },
+  { 
+    id: "user-004", 
+    name: "Finance Analyst", 
+    department: "Finance",
+    riskScore: 0.68, 
+    trend: 0.12,
+    riskFactors: [
+      { factor: "Unusual login times", weight: 0.3, score: 0.6 },
+      { factor: "Elevated privileges", weight: 0.25, score: 0.5 },
+      { factor: "File access volume", weight: 0.2, score: 0.95 },
+      { factor: "Network traffic", weight: 0.15, score: 0.6 },
+      { factor: "Failed logins", weight: 0.1, score: 0.8 },
+    ]
+  },
+  { 
+    id: "user-005", 
+    name: "Intern User", 
+    department: "Marketing",
+    riskScore: 0.25, 
+    trend: -0.1,
+    riskFactors: [
+      { factor: "Unusual login times", weight: 0.3, score: 0.2 },
+      { factor: "Elevated privileges", weight: 0.25, score: 0.1 },
+      { factor: "File access volume", weight: 0.2, score: 0.4 },
+      { factor: "Network traffic", weight: 0.15, score: 0.3 },
+      { factor: "Failed logins", weight: 0.1, score: 0.5 },
+    ]
+  }
+];
+
+// Calculate weighted risk scores
+export const calculateUserRiskScore = (riskFactors: Array<{factor: string, weight: number, score: number}>) => {
+  return riskFactors.reduce((total, factor) => total + (factor.weight * factor.score), 0);
+};
