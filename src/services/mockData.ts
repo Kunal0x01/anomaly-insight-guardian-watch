@@ -1,4 +1,26 @@
-import { faker } from '@faker-js/faker';
+
+// Using Date object instead of faker for dates
+const getRandomDate = () => {
+  const start = new Date('2025-01-01');
+  const end = new Date();
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+};
+
+// Using simple methods instead of faker
+const getRandomUserName = () => {
+  const names = ["Alice Johnson", "Bob Williams", "Charlie Brown", "Diana Miller", "Ethan Davis", "Fiona White", "George Black", "Hannah Green", "Isaac Blue", "Julia Red"];
+  return names[Math.floor(Math.random() * names.length)];
+};
+
+const getRandomEmail = (name: string) => {
+  const namePart = name.toLowerCase().replace(' ', '.');
+  const domains = ["example.com", "mail.com", "company.org", "service.net"];
+  return `${namePart}@${domains[Math.floor(Math.random() * domains.length)]}`;
+};
+
+const getRandomIP = () => {
+  return `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`;
+};
 
 export interface DashboardStats {
   totalUsers: number;
@@ -27,21 +49,32 @@ export interface UserRiskData {
   id: string;
   name: string;
   riskScore: number;
+  department?: string;
+  trend?: number;
 }
 
-export interface EnhancedUserRiskData {
-  id: string;
-  name: string;
+export interface EnhancedUserRiskData extends UserRiskData {
   email: string;
-  riskScore: number;
   anomalies: number;
   lastActive: Date;
   status: string;
+  riskFactors?: {
+    category: string;
+    value: number;
+  }[];
 }
 
-export interface AlertData {
+export interface Alert {
   id: string;
-  timestamp: Date;
+  timestamp: string;
+  title: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  entity: string;
+  status: 'new' | 'investigating' | 'resolved' | 'dismissed';
+}
+
+export interface AlertData extends Alert {
   user: string;
   activity: string;
   riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
@@ -230,66 +263,83 @@ for (const day of daysLabels) {
 }
 
 export const userRiskData: UserRiskData[] = [
-  { id: 'user1', name: 'Alice Johnson', riskScore: 0.15 },
-  { id: 'user2', name: 'Bob Williams', riskScore: 0.45 },
-  { id: 'user3', name: 'Charlie Brown', riskScore: 0.75 },
-  { id: 'user4', name: 'Diana Miller', riskScore: 0.25 },
-  { id: 'user5', name: 'Ethan Davis', riskScore: 0.60 },
+  { id: 'user1', name: 'Alice Johnson', riskScore: 0.15, department: 'IT', trend: 0 },
+  { id: 'user2', name: 'Bob Williams', riskScore: 0.45, department: 'Finance', trend: 5 },
+  { id: 'user3', name: 'Charlie Brown', riskScore: 0.75, department: 'HR', trend: -2 },
+  { id: 'user4', name: 'Diana Miller', riskScore: 0.25, department: 'Marketing', trend: 1 },
+  { id: 'user5', name: 'Ethan Davis', riskScore: 0.60, department: 'Sales', trend: 3 },
+];
+
+// Add example risk factors for users
+const exampleRiskFactors = [
+  { category: "Failed Logins", value: 0.65 },
+  { category: "Unusual Time", value: 0.42 },
+  { category: "New Location", value: 0.38 },
+  { category: "Data Access", value: 0.71 },
+  { category: "Admin Actions", value: 0.45 }
 ];
 
 export const enhancedUserRiskData: EnhancedUserRiskData[] = [
-  { id: 'user1', name: 'Alice Johnson', email: 'alice.johnson@example.com', riskScore: 0.15, anomalies: 0, lastActive: faker.date.past(), status: 'online' },
-  { id: 'user2', name: 'Bob Williams', email: 'bob.williams@example.com', riskScore: 0.45, anomalies: 2, lastActive: faker.date.past(), status: 'offline' },
-  { id: 'user3', name: 'Charlie Brown', email: 'charlie.brown@example.com', riskScore: 0.75, anomalies: 5, lastActive: faker.date.past(), status: 'online' },
-  { id: 'user4', name: 'Diana Miller', email: 'diana.miller@example.com', riskScore: 0.25, anomalies: 1, lastActive: faker.date.past(), status: 'offline' },
-  { id: 'user5', name: 'Ethan Davis', email: 'ethan.davis@example.com', riskScore: 0.60, anomalies: 3, lastActive: faker.date.past(), status: 'online' },
-  { id: 'user6', name: 'Fiona White', email: 'fiona.white@example.com', riskScore: 0.30, anomalies: 0, lastActive: faker.date.past(), status: 'online' },
-  { id: 'user7', name: 'George Black', email: 'george.black@example.com', riskScore: 0.85, anomalies: 7, lastActive: faker.date.past(), status: 'offline' },
-  { id: 'user8', name: 'Hannah Green', email: 'hannah.green@example.com', riskScore: 0.50, anomalies: 2, lastActive: faker.date.past(), status: 'online' },
-  { id: 'user9', name: 'Isaac Blue', email: 'isaac.blue@example.com', riskScore: 0.20, anomalies: 0, lastActive: faker.date.past(), status: 'offline' },
-  { id: 'user10', name: 'Julia Red', email: 'julia.red@example.com', riskScore: 0.70, anomalies: 4, lastActive: faker.date.past(), status: 'online' },
+  { id: 'user1', name: 'Alice Johnson', email: 'alice.johnson@example.com', riskScore: 0.15, anomalies: 0, lastActive: new Date(Date.now() - 1000 * 60 * 15), status: 'online', department: 'IT', trend: 0, riskFactors: exampleRiskFactors },
+  { id: 'user2', name: 'Bob Williams', email: 'bob.williams@example.com', riskScore: 0.45, anomalies: 2, lastActive: new Date(Date.now() - 1000 * 60 * 120), status: 'offline', department: 'Finance', trend: 5, riskFactors: exampleRiskFactors },
+  { id: 'user3', name: 'Charlie Brown', email: 'charlie.brown@example.com', riskScore: 0.75, anomalies: 5, lastActive: new Date(Date.now() - 1000 * 60 * 30), status: 'online', department: 'HR', trend: -2, riskFactors: exampleRiskFactors },
+  { id: 'user4', name: 'Diana Miller', email: 'diana.miller@example.com', riskScore: 0.25, anomalies: 1, lastActive: new Date(Date.now() - 1000 * 60 * 240), status: 'offline', department: 'Marketing', trend: 1, riskFactors: exampleRiskFactors },
+  { id: 'user5', name: 'Ethan Davis', email: 'ethan.davis@example.com', riskScore: 0.60, anomalies: 3, lastActive: new Date(Date.now() - 1000 * 60 * 45), status: 'online', department: 'Sales', trend: 3, riskFactors: exampleRiskFactors },
+  { id: 'user6', name: 'Fiona White', email: 'fiona.white@example.com', riskScore: 0.30, anomalies: 0, lastActive: new Date(Date.now() - 1000 * 60 * 75), status: 'online', department: 'Support', trend: -1, riskFactors: exampleRiskFactors },
+  { id: 'user7', name: 'George Black', email: 'george.black@example.com', riskScore: 0.85, anomalies: 7, lastActive: new Date(Date.now() - 1000 * 60 * 180), status: 'offline', department: 'Engineering', trend: 4, riskFactors: exampleRiskFactors },
+  { id: 'user8', name: 'Hannah Green', email: 'hannah.green@example.com', riskScore: 0.50, anomalies: 2, lastActive: new Date(Date.now() - 1000 * 60 * 60), status: 'online', department: 'Product', trend: 2, riskFactors: exampleRiskFactors },
+  { id: 'user9', name: 'Isaac Blue', email: 'isaac.blue@example.com', riskScore: 0.20, anomalies: 0, lastActive: new Date(Date.now() - 1000 * 60 * 320), status: 'offline', department: 'Operations', trend: -3, riskFactors: exampleRiskFactors },
+  { id: 'user10', name: 'Julia Red', email: 'julia.red@example.com', riskScore: 0.70, anomalies: 4, lastActive: new Date(Date.now() - 1000 * 60 * 20), status: 'online', department: 'R&D', trend: 1, riskFactors: exampleRiskFactors },
 ];
 
-export const alertsData: AlertData[] = [
+// Export usersData for UsersPage
+export const usersData = enhancedUserRiskData;
+
+export const alertsData: Alert[] = [
   {
     id: 'alert1',
-    timestamp: faker.date.recent(),
-    user: 'Charlie Brown',
-    activity: 'Multiple failed login attempts',
-    riskLevel: 'High',
-    details: 'User Charlie Brown had 5 failed login attempts in the last hour.'
+    timestamp: new Date().toLocaleString(),
+    title: 'Multiple failed login attempts',
+    description: 'User Charlie Brown had 5 failed login attempts in the last hour.',
+    severity: 'high',
+    entity: 'Charlie Brown',
+    status: 'new'
   },
   {
     id: 'alert2',
-    timestamp: faker.date.recent(),
-    user: 'Bob Williams',
-    activity: 'Unusual file access',
-    riskLevel: 'Medium',
-    details: 'User Bob Williams accessed a sensitive file outside of normal working hours.'
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toLocaleString(),
+    title: 'Unusual file access',
+    description: 'User Bob Williams accessed a sensitive file outside of normal working hours.',
+    severity: 'medium',
+    entity: 'Bob Williams',
+    status: 'investigating'
   },
   {
     id: 'alert3',
-    timestamp: faker.date.recent(),
-    user: 'Alice Johnson',
-    activity: 'New device login',
-    riskLevel: 'Low',
-    details: 'User Alice Johnson logged in from a new device.'
+    timestamp: new Date(Date.now() - 1000 * 60 * 120).toLocaleString(),
+    title: 'New device login',
+    description: 'User Alice Johnson logged in from a new device.',
+    severity: 'low',
+    entity: 'Alice Johnson',
+    status: 'resolved'
   },
   {
     id: 'alert4',
-    timestamp: faker.date.recent(),
-    user: 'Ethan Davis',
-    activity: 'Privilege escalation',
-    riskLevel: 'Critical',
-    details: 'User Ethan Davis attempted to escalate privileges.'
+    timestamp: new Date(Date.now() - 1000 * 60 * 180).toLocaleString(),
+    title: 'Privilege escalation',
+    description: 'User Ethan Davis attempted to escalate privileges.',
+    severity: 'high',
+    entity: 'Ethan Davis',
+    status: 'investigating'
   },
   {
     id: 'alert5',
-    timestamp: faker.date.recent(),
-    user: 'Diana Miller',
-    activity: 'Data exfiltration',
-    riskLevel: 'High',
-    details: 'User Diana Miller sent a large amount of data outside the network.'
+    timestamp: new Date(Date.now() - 1000 * 60 * 240).toLocaleString(),
+    title: 'Data exfiltration',
+    description: 'User Diana Miller sent a large amount of data outside the network.',
+    severity: 'high',
+    entity: 'Diana Miller',
+    status: 'new'
   },
 ];
 
@@ -297,21 +347,22 @@ export const firewallLogs: FirewallLog[] = [];
 
 // Generate firewall log data
 for (let i = 0; i < 25; i++) {
+  const userName = getRandomUserName();
   firewallLogs.push({
-    date: faker.date.recent().toLocaleDateString(),
-    time: faker.date.recent().toLocaleTimeString(),
-    user: faker.internet.userName(),
-    srcip: faker.internet.ip(),
-    dstip: faker.internet.ip(),
-    dstport: faker.internet.port(),
-    protocol: faker.internet.protocol(),
-    duration: faker.datatype.number({ min: 10, max: 1000 }),
-    sentbyte: faker.datatype.number({ min: 100, max: 100000 }),
-    rcvdbyte: faker.datatype.number({ min: 100, max: 100000 }),
-    sentpkt: faker.datatype.number({ min: 1, max: 100 }),
-    rcvdpkt: faker.datatype.number({ min: 1, max: 100 }),
-    flag: faker.random.word(),
-    tos: faker.random.word(),
+    date: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7).toLocaleDateString(),
+    time: new Date().toLocaleTimeString(),
+    user: userName.toLowerCase().split(' ')[0],
+    srcip: getRandomIP(),
+    dstip: getRandomIP(),
+    dstport: Math.floor(Math.random() * 10000) + 1000,
+    protocol: Math.random() > 0.5 ? 'TCP' : 'UDP',
+    duration: Math.floor(Math.random() * 990) + 10,
+    sentbyte: Math.floor(Math.random() * 99900) + 100,
+    rcvdbyte: Math.floor(Math.random() * 99900) + 100,
+    sentpkt: Math.floor(Math.random() * 99) + 1,
+    rcvdpkt: Math.floor(Math.random() * 99) + 1,
+    flag: Math.random() > 0.5 ? 'PSH' : 'ACK',
+    tos: Math.random() > 0.5 ? 'normal' : 'low-delay',
   });
 }
 

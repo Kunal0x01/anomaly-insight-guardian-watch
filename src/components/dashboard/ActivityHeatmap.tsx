@@ -2,8 +2,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+interface ActivityHeatmapData {
+  hour: string;
+  day: string;
+  value: number;
+}
+
 interface ActivityHeatmapProps {
-  data: number[][];
+  data: ActivityHeatmapData[] | number[][];
   xLabels: string[];
   yLabels: string[];
   title: string;
@@ -31,6 +37,23 @@ const ActivityHeatmap = ({
     return 'bg-red-500/40';
   };
 
+  // Process data into a 2D array format if it's an array of ActivityHeatmapData
+  let processedData: number[][] = [];
+  
+  if (!Array.isArray(data[0])) {
+    // Convert ActivityHeatmapData[] to number[][]
+    const heatmapData = data as ActivityHeatmapData[];
+    processedData = yLabels.map((day) => {
+      return xLabels.map((hour) => {
+        const entry = heatmapData.find(item => item.day === day && item.hour === hour);
+        return entry ? entry.value / 20 : 0; // Normalize to 0-1 range
+      });
+    });
+  } else {
+    // Data is already in number[][] format
+    processedData = data as number[][];
+  }
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -53,7 +76,7 @@ const ActivityHeatmap = ({
             </div>
           </div>
           
-          {data.map((row, rowIndex) => (
+          {processedData.map((row, rowIndex) => (
             <div key={`row-${rowIndex}`} className="flex items-center">
               <div className="w-12 text-xs text-muted-foreground text-right pr-2">
                 {yLabels[rowIndex]}

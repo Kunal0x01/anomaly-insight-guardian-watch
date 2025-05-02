@@ -40,8 +40,8 @@ const UsersPage = () => {
   const filteredUsers = usersData.filter(user => 
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchQuery.toLowerCase())
+    (user.department && user.department.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    user.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -82,7 +82,6 @@ const UsersPage = () => {
             <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Department</TableHead>
-              <TableHead>Role</TableHead>
               <TableHead>Risk Score</TableHead>
               <TableHead>Anomalies</TableHead>
               <TableHead>Last Active</TableHead>
@@ -109,8 +108,7 @@ const UsersPage = () => {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{user.department}</TableCell>
-                  <TableCell>{user.role}</TableCell>
+                  <TableCell>{user.department || 'N/A'}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="w-16 h-2 rounded-full bg-secondary overflow-hidden">

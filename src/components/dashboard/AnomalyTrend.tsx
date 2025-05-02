@@ -14,9 +14,10 @@ import { cn } from '@/lib/utils';
 
 interface AnomalyTrendProps {
   data: Array<{
-    name: string;
+    timestamp?: string;
+    name?: string;
     value: number;
-    anomalyScore: number;
+    anomalyScore?: number;
   }>;
   title: string;
   description?: string;
@@ -29,7 +30,7 @@ interface AnomalyTrendProps {
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     const value = payload[0].value;
-    const anomalyScore = payload[1].value;
+    const anomalyScore = payload[1]?.value;
     
     let anomalyStatus = "Normal";
     let statusColor = "text-anomaly-low";
@@ -63,6 +64,12 @@ const AnomalyTrend = ({
   gradientFrom = "rgba(59, 130, 246, 0.2)", 
   gradientTo = "rgba(59, 130, 246, 0)" 
 }: AnomalyTrendProps) => {
+  // Process data to ensure it has a name property (use timestamp if available)
+  const processedData = data.map(item => ({
+    ...item,
+    name: item.name || item.timestamp || ''
+  }));
+
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
@@ -73,7 +80,7 @@ const AnomalyTrend = ({
         <div style={{ width: '100%', height }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
-              data={data}
+              data={processedData}
               margin={{
                 top: 5,
                 right: 30,

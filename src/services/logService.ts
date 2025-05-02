@@ -67,7 +67,7 @@ function convertLogonActivityLogs(rawLogs: any[]): LogonActivityLog[] {
       Date: log.Date,
       "Time Period": log.Time_Period,
       Day: log.Day,
-      "No. of Logins": log.No._of_Logins,
+      "No. of Logins": log.No._of_Logins, 
       "No. of Logouts": log.No._of_Logouts,
       "No. of Failed Login Attempts": log.No._of_Failed_Login_Attempts,
       "No. of Account Lockout Attempts": log.No._of_Account_Lockout_Attempts

@@ -28,6 +28,15 @@ const anomalyDistributionData = [
   { name: "Account Lockout", count: 3 },
 ];
 
+// Create default risk factors if not present
+const defaultRiskFactors = [
+  { category: "Failed Logins", value: 0.3 },
+  { category: "Unusual Time", value: 0.2 },
+  { category: "New Location", value: 0.15 },
+  { category: "Data Access", value: 0.25 },
+  { category: "Admin Actions", value: 0.1 }
+];
+
 const Analytics = () => {
   const [selectedUser, setSelectedUser] = useState(enhancedUserRiskData[0].id);
   
@@ -195,7 +204,7 @@ const Analytics = () => {
             <UserRiskFactors
               userId={selectedUserData.id}
               userName={selectedUserData.name}
-              factors={selectedUserData.riskFactors}
+              factors={selectedUserData.riskFactors || defaultRiskFactors}
             />
           </CardContent>
         </Card>
@@ -213,7 +222,7 @@ const Analytics = () => {
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
-                  data={fileAccessData}
+                  data={fileAccessData.map(item => ({ name: item.timestamp, value: item.value, anomalyScore: item.anomalyScore }))}
                   margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />

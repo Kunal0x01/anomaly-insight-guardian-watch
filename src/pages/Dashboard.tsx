@@ -136,7 +136,15 @@ const Dashboard = () => {
           description="Sent and received bytes with anomaly detection"
           data={networkActivityData}
         />
-        <UserRiskScoreCard users={enhancedUserRiskData} />
+        <UserRiskScoreCard 
+          users={enhancedUserRiskData.map(user => ({
+            id: user.id,
+            name: user.name,
+            riskScore: user.riskScore,
+            department: user.department || '',
+            trend: user.trend || 0
+          }))} 
+        />
       </div>
 
       {/* Firewall Logs Table */}
@@ -148,7 +156,15 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
           <AlertList 
-            alerts={alertsData} 
+            alerts={alertsData.map(alert => ({
+              id: alert.id,
+              title: alert.title,
+              description: alert.description,
+              timestamp: alert.timestamp,
+              severity: alert.severity,
+              entity: alert.entity,
+              status: alert.status
+            }))} 
             onViewAll={handleViewAllAlerts}
           />
         </div>

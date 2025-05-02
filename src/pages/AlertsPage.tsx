@@ -61,7 +61,8 @@ const AlertsPage = () => {
     });
   };
 
-  const filteredAlerts = alertsData.filter((alert: Alert) => {
+  // The Alert type from AlertList and our data should now match correctly
+  const filteredAlerts = alertsData.filter((alert) => {
     // Apply search filter
     const searchMatch = 
       alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -228,7 +229,7 @@ const AlertsPage = () => {
       )}
 
       <div className="grid grid-cols-1 gap-4">
-        {filteredAlerts.map((alert: Alert) => (
+        {filteredAlerts.map((alert) => (
           <Card key={alert.id} className="overflow-hidden">
             <div className={cn(
               "w-1 absolute left-0 top-0 bottom-0",
