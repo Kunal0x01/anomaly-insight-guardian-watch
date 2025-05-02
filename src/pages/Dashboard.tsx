@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BarChart2, FileText, Shield, ShieldAlert, User, Users } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import StatCard from "@/components/dashboard/StatCard";
@@ -32,12 +32,18 @@ import {
   uploadedLogonActivityLogs,
   uploadedNetworkActivityLogs
 } from "@/services/mockData";
+import { fetchLogs } from "@/services/logService";
+import { FileAccessLog, LogonActivityLog, NetworkActivityLog } from "@/services/mockData";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [hasFileAccess, setHasFileAccess] = useState(false);
   const [hasLogonActivity, setHasLogonActivity] = useState(false);
   const [hasNetworkActivity, setHasNetworkActivity] = useState(false);
+  const [fileAccessLogs, setFileAccessLogs] = useState<FileAccessLog[]>([]);
+  const [logonActivityLogs, setLogonActivityLogs] = useState<LogonActivityLog[]>([]);
+  const [networkActivityLogs, setNetworkActivityLogs] = useState<NetworkActivityLog[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleViewAllAlerts = () => {
     navigate("/alerts");
@@ -48,6 +54,29 @@ const Dashboard = () => {
     setHasLogonActivity(logonActivityCount > 0);
     setHasNetworkActivity(networkActivityCount > 0);
   };
+
+  // Fetch logs on component mount
+  useEffect(() => {
+    const loadLogs = async () => {
+      setIsLoading(true);
+      try {
+        const logs = await fetchLogs();
+        setFileAccessLogs(logs.fileAccessLogs);
+        setLogonActivityLogs(logs.logonActivityLogs);
+        setNetworkActivityLogs(logs.networkActivityLogs);
+        
+        setHasFileAccess(logs.fileAccessLogs.length > 0);
+        setHasLogonActivity(logs.logonActivityLogs.length > 0);
+        setHasNetworkActivity(logs.networkActivityLogs.length > 0);
+      } catch (error) {
+        console.error("Error loading logs:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadLogs();
+  }, []);
 
   return (
     <DashboardLayout>
@@ -60,22 +89,32 @@ const Dashboard = () => {
 
       {/* Log Data Fetcher */}
       <div className="mb-6">
-        <LogFileUploader onLogsProcessed={handleLogsProcessed} />
+        <LogFileUploader 
+          onLogsProcessed={(fileAccessCount, logonActivityCount, networkActivityCount) => {
+            handleLogsProcessed(fileAccessCount, logonActivityCount, networkActivityCount);
+            // Refresh logs after processing
+            fetchLogs().then(logs => {
+              setFileAccessLogs(logs.fileAccessLogs);
+              setLogonActivityLogs(logs.logonActivityLogs);
+              setNetworkActivityLogs(logs.networkActivityLogs);
+            });
+          }} 
+        />
       </div>
 
       {/* Fetched Log Data Visualizations */}
       {(hasFileAccess || hasLogonActivity || hasNetworkActivity) && (
-        <div className="grid grid-cols-1 gap-6 mb-6">
-          {hasFileAccess && (
-            <FileAccessVisualization logs={uploadedFileAccessLogs} />
+        <div className="space-y-6 mb-6">
+          {hasFileAccess && fileAccessLogs.length > 0 && (
+            <FileAccessVisualization logs={fileAccessLogs} />
           )}
           
-          {hasLogonActivity && (
-            <LogonActivityVisualization logs={uploadedLogonActivityLogs} />
+          {hasLogonActivity && logonActivityLogs.length > 0 && (
+            <LogonActivityVisualization logs={logonActivityLogs} />
           )}
           
-          {hasNetworkActivity && (
-            <NetworkActivityVisualization logs={uploadedNetworkActivityLogs} />
+          {hasNetworkActivity && networkActivityLogs.length > 0 && (
+            <NetworkActivityVisualization logs={networkActivityLogs} />
           )}
         </div>
       )}
@@ -118,12 +157,20 @@ const Dashboard = () => {
         <AnomalyTrend
           title="Login Activity"
           description="Number of logins over time with anomaly score"
-          data={loginActivityData}
+          data={loginActivityData.map(item => ({
+            name: item.timestamp,
+            value: item.value,
+            anomalyScore: item.anomalyScore
+          }))}
         />
         <AnomalyTrend
           title="Failed Login Attempts"
           description="Failed login attempts with anomaly detection"
-          data={failedLoginData}
+          data={failedLoginData.map(item => ({
+            name: item.timestamp,
+            value: item.value,
+            anomalyScore: item.anomalyScore
+          }))}
           gradientFrom="rgba(239, 68, 68, 0.2)"
           gradientTo="rgba(239, 68, 68, 0)"
         />
@@ -156,18 +203,17 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
           <AlertList 
-            alerts={alertsData.filter(alert => 
-              // Filter out any alerts with "critical" severity since Alert component doesn't support it
-              alert.severity !== "critical" ? true : false
-            ).map(alert => ({
-              id: alert.id,
-              title: alert.title,
-              description: alert.description,
-              timestamp: alert.timestamp,
-              severity: alert.severity === "critical" ? "high" : alert.severity,
-              entity: alert.entity,
-              status: alert.status
-            }))} 
+            alerts={alertsData
+              .filter(alert => alert.severity !== "critical" || alert.severity === "critical")
+              .map(alert => ({
+                id: alert.id,
+                title: alert.title,
+                description: alert.description,
+                timestamp: alert.timestamp,
+                severity: alert.severity,
+                entity: alert.entity,
+                status: alert.status
+              }))} 
             onViewAll={handleViewAllAlerts}
           />
         </div>
@@ -195,7 +241,11 @@ const Dashboard = () => {
           <AnomalyTrend
             title="File Access Activity"
             description="File access operations with anomaly detection"
-            data={fileAccessData}
+            data={fileAccessData.map(item => ({
+              name: item.timestamp,
+              value: item.value,
+              anomalyScore: item.anomalyScore
+            }))}
             gradientFrom="rgba(16, 185, 129, 0.2)"
             gradientTo="rgba(16, 185, 129, 0)"
             height={250}

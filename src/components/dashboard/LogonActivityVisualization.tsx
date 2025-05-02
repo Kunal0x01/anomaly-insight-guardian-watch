@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { LogIn, Table } from 'lucide-react';
 import { LogonActivityLog } from '@/services/mockData';
 import { cn } from '@/lib/utils';
@@ -25,15 +26,18 @@ const LogonActivityVisualization: React.FC<LogonActivityVisualizationProps> = ({
   if (!logs.length) return null;
   
   // Process data for visualization
-  const hostData = logs.map(log => ({
-    hostname: log.Details.Hostname,
-    date: log.Details.Date,
-    logins: log.Details["No. of Logins"],
-    logouts: log.Details["No. of Logouts"],
-    failedLogins: log.Details["No. of Failed Login Attempts"],
-    accountLockouts: log.Details["No. of Account Lockout Attempts"],
-    risk: log.RiskLevel || 'Low'
-  }));
+  const hostData = logs.map(log => {
+    const details = log.Details;
+    return {
+      hostname: details.Hostname,
+      date: details.Date,
+      logins: details["No. of Logins"] || 0,
+      logouts: details["No. of Logouts"] || 0,
+      failedLogins: details["No. of Failed Login Attempts"] || 0,
+      accountLockouts: details["No. of Account Lockout Attempts"] || 0,
+      risk: log.RiskLevel || 'Low'
+    };
+  });
   
   // Aggregate by hostname
   const aggregatedData = hostData.reduce<Record<string, {
@@ -120,40 +124,42 @@ const LogonActivityVisualization: React.FC<LogonActivityVisualizationProps> = ({
                   accountLockouts: { label: "Account Lockouts" }
                 }}
               >
-                <BarChart
-                  data={chartData}
-                  margin={{ top: 5, right: 30, left: 80, bottom: 25 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis 
-                    dataKey="hostname" 
-                    tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 12 }} 
-                    stroke="rgba(255,255,255,0.1)"
-                  />
-                  <YAxis 
-                    tick={{ fill: 'rgba(255,255,255,0.6)' }} 
-                    stroke="rgba(255,255,255,0.1)"
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--background))',
-                      borderColor: 'hsl(var(--border))',
-                    }}
-                  />
-                  <Legend />
-                  <Bar dataKey="logins" fill="#10b981" />
-                  <Bar dataKey="logouts" fill="#6366f1" />
-                  <Bar dataKey="failedLogins" fill="#f97316" />
-                  <Bar dataKey="accountLockouts" fill="#ef4444" />
-                </BarChart>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={chartData}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 25 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                    <XAxis 
+                      dataKey="hostname" 
+                      tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 12 }} 
+                      stroke="rgba(255,255,255,0.1)"
+                    />
+                    <YAxis 
+                      tick={{ fill: 'rgba(255,255,255,0.6)' }} 
+                      stroke="rgba(255,255,255,0.1)"
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--background))',
+                        borderColor: 'hsl(var(--border))',
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="logins" fill="#10b981" />
+                    <Bar dataKey="logouts" fill="#6366f1" />
+                    <Bar dataKey="failedLogins" fill="#f97316" />
+                    <Bar dataKey="accountLockouts" fill="#ef4444" />
+                  </BarChart>
+                </ResponsiveContainer>
               </ChartContainer>
             </div>
           </TabsContent>
           
           <TabsContent value="table">
-            <div className="border border-border/30 rounded-md overflow-hidden">
+            <div className="border border-border/30 rounded-md overflow-auto max-h-[400px]">
               <UITable>
-                <TableHeader className="bg-secondary/50 backdrop-blur-sm">
+                <TableHeader className="bg-secondary/50 backdrop-blur-sm sticky top-0">
                   <TableRow>
                     <TableHead className="text-xs font-medium">Hostname</TableHead>
                     <TableHead className="text-xs font-medium">Date</TableHead>
@@ -166,36 +172,39 @@ const LogonActivityVisualization: React.FC<LogonActivityVisualizationProps> = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {logs.map((log, idx) => (
-                    <TableRow key={idx} className={log.Details["No. of Failed Login Attempts"] > 0 || log.Details["No. of Account Lockout Attempts"] > 0 ? "bg-destructive/10" : ""}>
-                      <TableCell className="text-xs font-medium">{log.Details.Hostname}</TableCell>
-                      <TableCell className="text-xs">{log.Details.Date || "N/A"}</TableCell>
-                      <TableCell className="text-xs">
-                        {dayMapper[log.Details.Day] || "Unknown"} / {periodMapper[log.Details["Time Period"]] || "Unknown"}
-                      </TableCell>
-                      <TableCell className="text-xs text-right">{log.Details["No. of Logins"]}</TableCell>
-                      <TableCell className="text-xs text-right">{log.Details["No. of Logouts"]}</TableCell>
-                      <TableCell className="text-xs text-right">
-                        {log.Details["No. of Failed Login Attempts"] > 0 ? (
-                          <span className="text-anomaly-high font-medium">{log.Details["No. of Failed Login Attempts"]}</span>
-                        ) : (
-                          log.Details["No. of Failed Login Attempts"]
-                        )}
-                      </TableCell>
-                      <TableCell className="text-xs text-right">
-                        {log.Details["No. of Account Lockout Attempts"] > 0 ? (
-                          <span className="text-anomaly-high font-medium">{log.Details["No. of Account Lockout Attempts"]}</span>
-                        ) : (
-                          log.Details["No. of Account Lockout Attempts"]
-                        )}
-                      </TableCell>
-                      <TableCell className="text-xs text-right">
-                        <Badge variant="outline" className={getRiskBadgeClass(log.RiskLevel || 'Low')}>
-                          {log.RiskLevel || 'Low'}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {logs.map((log, idx) => {
+                    const details = log.Details;
+                    return (
+                      <TableRow key={idx} className={(details["No. of Failed Login Attempts"] > 0 || details["No. of Account Lockout Attempts"] > 0) ? "bg-destructive/10" : ""}>
+                        <TableCell className="text-xs font-medium">{details.Hostname}</TableCell>
+                        <TableCell className="text-xs">{details.Date || "N/A"}</TableCell>
+                        <TableCell className="text-xs">
+                          {dayMapper[details.Day] || "Unknown"} / {periodMapper[details["Time Period"]] || "Unknown"}
+                        </TableCell>
+                        <TableCell className="text-xs text-right">{details["No. of Logins"] || 0}</TableCell>
+                        <TableCell className="text-xs text-right">{details["No. of Logouts"] || 0}</TableCell>
+                        <TableCell className="text-xs text-right">
+                          {details["No. of Failed Login Attempts"] > 0 ? (
+                            <span className="text-anomaly-high font-medium">{details["No. of Failed Login Attempts"]}</span>
+                          ) : (
+                            details["No. of Failed Login Attempts"] || 0
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs text-right">
+                          {details["No. of Account Lockout Attempts"] > 0 ? (
+                            <span className="text-anomaly-high font-medium">{details["No. of Account Lockout Attempts"]}</span>
+                          ) : (
+                            details["No. of Account Lockout Attempts"] || 0
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs text-right">
+                          <Badge variant="outline" className={getRiskBadgeClass(log.RiskLevel || 'Low')}>
+                            {log.RiskLevel || 'Low'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </UITable>
             </div>

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, RefreshCw } from 'lucide-react';
+import { FileText, RefreshCw, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { jsPDF } from 'jspdf';
 import { fetchLogs, logServerConfig, getLogServerUrl } from '@/services/logService';
@@ -18,6 +18,7 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
   const [isFetching, setIsFetching] = useState(false);
   const [hasData, setHasData] = useState(false);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   
   // Server configuration state
@@ -27,6 +28,7 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
 
   const fetchLogData = async () => {
     setIsFetching(true);
+    setError(null);
     
     try {
       // Update config with latest values
@@ -50,6 +52,7 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
       });
     } catch (error) {
       console.error('Error fetching logs:', error);
+      setError(`Could not connect to log server at ${getLogServerUrl()}`);
       toast({
         title: "Error fetching logs",
         description: `Could not connect to log server at ${getLogServerUrl()}. Please check your connection settings.`,
@@ -77,9 +80,10 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
       const doc = new jsPDF();
       doc.text("Security Log Analysis Report", 20, 20);
       doc.text("Generated on: " + new Date().toLocaleString(), 20, 30);
+      doc.text("Log server: " + getLogServerUrl(), 20, 40);
       
       // Add more sections and visualizations based on log data
-      doc.text("This report contains analysis of fetched log files", 20, 40);
+      doc.text("This report contains analysis of fetched log files", 20, 50);
       
       doc.save("security-log-report.pdf");
       
@@ -99,9 +103,14 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
         </CardTitle>
         <CardDescription>
           Fetches and analyzes log data from server
-          {lastFetched && (
+          {lastFetched && !error && (
             <span className="block text-xs mt-1 text-muted-foreground">
               Last fetched: {lastFetched.toLocaleString()}
+            </span>
+          )}
+          {error && (
+            <span className="block text-xs mt-1 text-red-400 flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" /> {error}
             </span>
           )}
         </CardDescription>
@@ -157,7 +166,7 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
                   id="server-port"
                   value={serverPort}
                   onChange={(e) => setServerPort(e.target.value)}
-                  placeholder="e.g., 8000"
+                  placeholder="e.g., 8081"
                   className="h-8"
                 />
               </div>
@@ -166,7 +175,7 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
           
           <div className="text-xs text-muted-foreground">
             <p>Connected to log server: {getLogServerUrl()}</p>
-            <p className="mt-1">Parsing File_access_log.ndjson, Login_event_log.ndjson, and Network_access_log.ndjson</p>
+            <p className="mt-1">Parsing File_acess_log.ndjson, Login_event_log.ndjson, and Network_acess_log.ndjson</p>
           </div>
         </div>
       </CardContent>
