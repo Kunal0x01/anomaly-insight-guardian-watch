@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
@@ -15,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
 interface NetworkActivityVisualizationProps {
   logs: NetworkActivityLog[];
@@ -35,7 +35,8 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
     receivedBytes: log.Details.rcvdbyte,
     sentPackets: log.Details.sentpkt,
     receivedPackets: log.Details.rcvdpkt,
-    totalBytes: log.Details.sentbyte + log.Details.rcvdbyte
+    totalBytes: log.Details.sentbyte + log.Details.rcvdbyte,
+    risk: log.RiskLevel || 'Low'
   }));
 
   // Aggregate data by user
@@ -44,7 +45,8 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
     receivedBytes: number,
     totalBytes: number,
     avgDuration: number,
-    connections: number
+    connections: number,
+    risk: string
   }>>((acc, log) => {
     if (!acc[log.user]) {
       acc[log.user] = {
@@ -52,7 +54,8 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
         receivedBytes: 0,
         totalBytes: 0,
         avgDuration: 0,
-        connections: 0
+        connections: 0,
+        risk: log.risk
       };
     }
     
@@ -64,6 +67,15 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
       (acc[log.user].connections + 1);
     acc[log.user].connections += 1;
     
+    // Keep the highest risk level
+    const riskOrder = { 'Low': 1, 'Medium': 2, 'High': 3, 'Critical': 4 };
+    const currentRiskLevel = riskOrder[log.risk as keyof typeof riskOrder] || 1;
+    const existingRiskLevel = riskOrder[acc[log.user].risk as keyof typeof riskOrder] || 1;
+    
+    if (currentRiskLevel > existingRiskLevel) {
+      acc[log.user].risk = log.risk;
+    }
+    
     return acc;
   }, {});
   
@@ -74,7 +86,8 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
     receivedBytes: data.receivedBytes,
     totalBytes: data.totalBytes,
     avgDuration: Math.round(data.avgDuration),
-    connections: data.connections
+    connections: data.connections,
+    risk: data.risk
   })).sort((a, b) => b.totalBytes - a.totalBytes);
 
   // Format port usage
@@ -92,6 +105,18 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
     const sizes = ["B", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+  };
+
+  const getRiskBadgeClass = (risk: string) => {
+    switch (risk) {
+      case 'Critical':
+      case 'High': 
+        return "bg-anomaly-high/10 text-anomaly-high border-anomaly-high/40";
+      case 'Medium':
+        return "bg-anomaly-medium/10 text-anomaly-medium border-anomaly-medium/40";
+      default:
+        return "bg-anomaly-low/10 text-anomaly-low border-anomaly-low/40";
+    }
   };
 
   return (
@@ -208,6 +233,7 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
                     <TableHead className="text-xs font-medium text-right">Duration (ms)</TableHead>
                     <TableHead className="text-xs font-medium text-right">Sent</TableHead>
                     <TableHead className="text-xs font-medium text-right">Received</TableHead>
+                    <TableHead className="text-xs font-medium text-right">Risk Level</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -231,6 +257,11 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
                         <span className={log.receivedBytes > 100000 ? "text-anomaly-high font-medium" : ""}>
                           {formatBytes(log.receivedBytes)}
                         </span>
+                      </TableCell>
+                      <TableCell className="text-xs text-right">
+                        <Badge variant="outline" className={getRiskBadgeClass(log.risk)}>
+                          {log.risk}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -56,17 +56,14 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">Monitor user behavior and security anomalies</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="text-sm text-muted-foreground">Last updated: April 7, 2025 - 16:45</div>
-        </div>
       </div>
 
-      {/* Log File Upload */}
+      {/* Log Data Fetcher */}
       <div className="mb-6">
         <LogFileUploader onLogsProcessed={handleLogsProcessed} />
       </div>
 
-      {/* Uploaded Data Visualizations */}
+      {/* Fetched Log Data Visualizations */}
       {(hasFileAccess || hasLogonActivity || hasNetworkActivity) && (
         <div className="grid grid-cols-1 gap-6 mb-6">
           {hasFileAccess && (

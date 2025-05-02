@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
@@ -15,6 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
 interface LogonActivityVisualizationProps {
   logs: LogonActivityLog[];
@@ -31,17 +31,25 @@ const LogonActivityVisualization: React.FC<LogonActivityVisualizationProps> = ({
     logins: log.Details["No. of Logins"],
     logouts: log.Details["No. of Logouts"],
     failedLogins: log.Details["No. of Failed Login Attempts"],
-    accountLockouts: log.Details["No. of Account Lockout Attempts"]
+    accountLockouts: log.Details["No. of Account Lockout Attempts"],
+    risk: log.RiskLevel || 'Low'
   }));
   
   // Aggregate by hostname
-  const aggregatedData = hostData.reduce<Record<string, {logins: number, logouts: number, failedLogins: number, accountLockouts: number}>>((acc, log) => {
+  const aggregatedData = hostData.reduce<Record<string, {
+    logins: number, 
+    logouts: number, 
+    failedLogins: number, 
+    accountLockouts: number,
+    risk: string
+  }>>((acc, log) => {
     if (!acc[log.hostname]) {
       acc[log.hostname] = {
         logins: 0,
         logouts: 0,
         failedLogins: 0,
-        accountLockouts: 0
+        accountLockouts: 0,
+        risk: log.risk
       };
     }
     
@@ -49,6 +57,15 @@ const LogonActivityVisualization: React.FC<LogonActivityVisualizationProps> = ({
     acc[log.hostname].logouts += log.logouts;
     acc[log.hostname].failedLogins += log.failedLogins;
     acc[log.hostname].accountLockouts += log.accountLockouts;
+    
+    // Keep the highest risk level
+    const riskOrder = { 'Low': 1, 'Medium': 2, 'High': 3, 'Critical': 4 };
+    const currentRiskLevel = riskOrder[log.risk as keyof typeof riskOrder] || 1;
+    const existingRiskLevel = riskOrder[acc[log.hostname].risk as keyof typeof riskOrder] || 1;
+    
+    if (currentRiskLevel > existingRiskLevel) {
+      acc[log.hostname].risk = log.risk;
+    }
     
     return acc;
   }, {});
@@ -62,6 +79,18 @@ const LogonActivityVisualization: React.FC<LogonActivityVisualizationProps> = ({
   
   const dayMapper = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const periodMapper = ["", "Morning (00:00-06:00)", "Day (06:00-12:00)", "Afternoon (12:00-18:00)", "Night (18:00-24:00)"];
+
+  const getRiskBadgeClass = (risk: string) => {
+    switch (risk) {
+      case 'Critical':
+      case 'High': 
+        return "bg-anomaly-high/10 text-anomaly-high border-anomaly-high/40";
+      case 'Medium':
+        return "bg-anomaly-medium/10 text-anomaly-medium border-anomaly-medium/40";
+      default:
+        return "bg-anomaly-low/10 text-anomaly-low border-anomaly-low/40";
+    }
+  };
 
   return (
     <Card className={cn("cyber-border backdrop-blur-sm scanning-effect", className)}>
@@ -133,6 +162,7 @@ const LogonActivityVisualization: React.FC<LogonActivityVisualizationProps> = ({
                     <TableHead className="text-xs font-medium text-right">Logouts</TableHead>
                     <TableHead className="text-xs font-medium text-right">Failed Attempts</TableHead>
                     <TableHead className="text-xs font-medium text-right">Lockouts</TableHead>
+                    <TableHead className="text-xs font-medium text-right">Risk Level</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -158,6 +188,11 @@ const LogonActivityVisualization: React.FC<LogonActivityVisualizationProps> = ({
                         ) : (
                           log.Details["No. of Account Lockout Attempts"]
                         )}
+                      </TableCell>
+                      <TableCell className="text-xs text-right">
+                        <Badge variant="outline" className={getRiskBadgeClass(log.RiskLevel || 'Low')}>
+                          {log.RiskLevel || 'Low'}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}

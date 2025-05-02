@@ -1,389 +1,80 @@
-// Mock data for the UEBA dashboard
+import { faker } from '@faker-js/faker';
 
-// Login activity data
-export const loginActivityData = [
-  { name: "00:00", value: 32, anomalyScore: 0.1 },
-  { name: "01:00", value: 18, anomalyScore: 0.05 },
-  { name: "02:00", value: 12, anomalyScore: 0.02 },
-  { name: "03:00", value: 8, anomalyScore: 0.15 },
-  { name: "04:00", value: 6, anomalyScore: 0.1 },
-  { name: "05:00", value: 10, anomalyScore: 0.05 },
-  { name: "06:00", value: 25, anomalyScore: 0.03 },
-  { name: "07:00", value: 55, anomalyScore: 0.02 },
-  { name: "08:00", value: 122, anomalyScore: 0.1 },
-  { name: "09:00", value: 170, anomalyScore: 0.2 },
-  { name: "10:00", value: 156, anomalyScore: 0.85 },
-  { name: "11:00", value: 130, anomalyScore: 0.15 },
-  { name: "12:00", value: 110, anomalyScore: 0.1 },
-  { name: "13:00", value: 140, anomalyScore: 0.05 },
-  { name: "14:00", value: 152, anomalyScore: 0.1 },
-  { name: "15:00", value: 138, anomalyScore: 0.35 },
-  { name: "16:00", value: 145, anomalyScore: 0.25 },
-  { name: "17:00", value: 120, anomalyScore: 0.1 },
-  { name: "18:00", value: 80, anomalyScore: 0.05 },
-  { name: "19:00", value: 65, anomalyScore: 0.02 },
-  { name: "20:00", value: 45, anomalyScore: 0.1 },
-  { name: "21:00", value: 35, anomalyScore: 0.2 },
-  { name: "22:00", value: 30, anomalyScore: 0.1 },
-  { name: "23:00", value: 25, anomalyScore: 0.05 },
-];
+export interface DashboardStats {
+  totalUsers: number;
+  activeUsers: number;
+  todayAnomalies: number;
+  totalAnomalies: number;
+  highRiskUsers: number;
+  mediumRiskUsers: number;
+  lowRiskUsers: number;
+  averageRiskScore: number;
+}
 
-// Failed login attempts data
-export const failedLoginData = [
-  { name: "00:00", value: 2, anomalyScore: 0.1 },
-  { name: "01:00", value: 1, anomalyScore: 0.05 },
-  { name: "02:00", value: 0, anomalyScore: 0.02 },
-  { name: "03:00", value: 1, anomalyScore: 0.1 },
-  { name: "04:00", value: 0, anomalyScore: 0.05 },
-  { name: "05:00", value: 1, anomalyScore: 0.02 },
-  { name: "06:00", value: 2, anomalyScore: 0.1 },
-  { name: "07:00", value: 3, anomalyScore: 0.15 },
-  { name: "08:00", value: 4, anomalyScore: 0.2 },
-  { name: "09:00", value: 3, anomalyScore: 0.15 },
-  { name: "10:00", value: 17, anomalyScore: 0.9 },
-  { name: "11:00", value: 5, anomalyScore: 0.2 },
-  { name: "12:00", value: 2, anomalyScore: 0.1 },
-  { name: "13:00", value: 3, anomalyScore: 0.15 },
-  { name: "14:00", value: 2, anomalyScore: 0.1 },
-  { name: "15:00", value: 11, anomalyScore: 0.75 },
-  { name: "16:00", value: 2, anomalyScore: 0.1 },
-  { name: "17:00", value: 3, anomalyScore: 0.15 },
-  { name: "18:00", value: 2, anomalyScore: 0.1 },
-  { name: "19:00", value: 1, anomalyScore: 0.05 },
-  { name: "20:00", value: 0, anomalyScore: 0.02 },
-  { name: "21:00", value: 1, anomalyScore: 0.05 },
-  { name: "22:00", value: 0, anomalyScore: 0.02 },
-  { name: "23:00", value: 1, anomalyScore: 0.05 },
-];
+export interface AnomalyTrendData {
+  timestamp: string;
+  value: number;
+  anomalyScore?: number;
+}
 
-// File access data
-export const fileAccessData = [
-  { name: "00:00", value: 45, anomalyScore: 0.1 },
-  { name: "01:00", value: 32, anomalyScore: 0.05 },
-  { name: "02:00", value: 18, anomalyScore: 0.02 },
-  { name: "03:00", value: 15, anomalyScore: 0.1 },
-  { name: "04:00", value: 12, anomalyScore: 0.05 },
-  { name: "05:00", value: 10, anomalyScore: 0.02 },
-  { name: "06:00", value: 25, anomalyScore: 0.1 },
-  { name: "07:00", value: 35, anomalyScore: 0.15 },
-  { name: "08:00", value: 65, anomalyScore: 0.2 },
-  { name: "09:00", value: 85, anomalyScore: 0.15 },
-  { name: "10:00", value: 95, anomalyScore: 0.1 },
-  { name: "11:00", value: 110, anomalyScore: 0.2 },
-  { name: "12:00", value: 90, anomalyScore: 0.1 },
-  { name: "13:00", value: 95, anomalyScore: 0.15 },
-  { name: "14:00", value: 120, anomalyScore: 0.1 },
-  { name: "15:00", value: 230, anomalyScore: 0.95 },
-  { name: "16:00", value: 125, anomalyScore: 0.1 },
-  { name: "17:00", value: 110, anomalyScore: 0.15 },
-  { name: "18:00", value: 90, anomalyScore: 0.1 },
-  { name: "19:00", value: 65, anomalyScore: 0.05 },
-  { name: "20:00", value: 50, anomalyScore: 0.02 },
-  { name: "21:00", value: 40, anomalyScore: 0.05 },
-  { name: "22:00", value: 35, anomalyScore: 0.02 },
-  { name: "23:00", value: 30, anomalyScore: 0.05 },
-];
+export interface ActivityHeatmapData {
+  hour: string;
+  day: string;
+  value: number;
+}
 
-// Network traffic data with anomalies
-export const networkActivityData = [
-  { timestamp: "00:00", sentBytes: 2517, receivedBytes: 7529, anomalyScore: 0.1 },
-  { timestamp: "01:00", sentBytes: 7074, receivedBytes: 12519, anomalyScore: 0.2 },
-  { timestamp: "02:00", sentBytes: 4928, receivedBytes: 17525, anomalyScore: 0.05 },
-  { timestamp: "03:00", sentBytes: 2367, receivedBytes: 3046, anomalyScore: 0.1 },
-  { timestamp: "04:00", sentBytes: 5420, receivedBytes: 8991, anomalyScore: 0.3 },
-  { timestamp: "05:00", sentBytes: 5660, receivedBytes: 2279, anomalyScore: 0.1 },
-  { timestamp: "06:00", sentBytes: 7185, receivedBytes: 7919, anomalyScore: 0.2 },
-  { timestamp: "07:00", sentBytes: 10317, receivedBytes: 13663, anomalyScore: 0.3 },
-  { timestamp: "08:00", sentBytes: 20449, receivedBytes: 48203, anomalyScore: 0.4 },
-  { timestamp: "09:00", sentBytes: 35660, receivedBytes: 52279, anomalyScore: 0.2 },
-  { timestamp: "10:00", sentBytes: 588186, receivedBytes: 433044, anomalyScore: 0.95 },
-  { timestamp: "11:00", sentBytes: 37052, receivedBytes: 56302, anomalyScore: 0.3 },
-  { timestamp: "12:00", sentBytes: 33103, receivedBytes: 45591, anomalyScore: 0.1 },
-  { timestamp: "13:00", sentBytes: 26215, receivedBytes: 1163840, anomalyScore: 0.9 },
-  { timestamp: "14:00", sentBytes: 42495, receivedBytes: 99619, anomalyScore: 0.75 },
-  { timestamp: "15:00", sentBytes: 29522, receivedBytes: 27909, anomalyScore: 0.1 },
-  { timestamp: "16:00", sentBytes: 32089, receivedBytes: 45458, anomalyScore: 0.2 },
-  { timestamp: "17:00", sentBytes: 167079, receivedBytes: 152449, anomalyScore: 0.85 },
-  { timestamp: "18:00", sentBytes: 33634, receivedBytes: 44428, anomalyScore: 0.3 },
-  { timestamp: "19:00", sentBytes: 22669, receivedBytes: 33184, anomalyScore: 0.2 },
-  { timestamp: "20:00", sentBytes: 19650, receivedBytes: 13793, anomalyScore: 0.1 },
-  { timestamp: "21:00", sentBytes: 11637, receivedBytes: 11280, anomalyScore: 0.05 },
-  { timestamp: "22:00", sentBytes: 9154, receivedBytes: 9379, anomalyScore: 0.1 },
-  { timestamp: "23:00", sentBytes: 7317, receivedBytes: 8663, anomalyScore: 0.2 },
-];
+export interface UserRiskData {
+  id: string;
+  name: string;
+  riskScore: number;
+}
 
-// Heatmap data - User login activity by hour and day
-export const loginHeatmapData = [
-  // Hours as columns, days as rows - values between 0 and 1
-  [0.1, 0.05, 0.02, 0.01, 0.01, 0.05, 0.2, 0.5, 0.8, 0.9, 0.7, 0.6, 0.7, 0.8, 0.7, 0.6, 0.7, 0.4, 0.2, 0.1, 0.05, 0.05, 0.03, 0.02],
-  [0.1, 0.05, 0.02, 0.01, 0.01, 0.05, 0.2, 0.5, 0.8, 0.9, 0.7, 0.6, 0.7, 0.8, 0.7, 0.6, 0.7, 0.4, 0.2, 0.1, 0.05, 0.05, 0.03, 0.02],
-  [0.1, 0.05, 0.02, 0.01, 0.01, 0.05, 0.2, 0.5, 0.8, 0.9, 0.7, 0.6, 0.7, 0.8, 0.7, 0.6, 0.7, 0.4, 0.2, 0.1, 0.05, 0.05, 0.03, 0.02],
-  [0.1, 0.05, 0.02, 0.01, 0.01, 0.05, 0.2, 0.5, 0.8, 0.9, 0.7, 0.6, 0.7, 0.8, 0.7, 0.6, 0.7, 0.4, 0.2, 0.1, 0.05, 0.05, 0.03, 0.02],
-  [0.1, 0.05, 0.02, 0.01, 0.01, 0.05, 0.2, 0.5, 0.8, 0.9, 0.7, 0.6, 0.7, 0.8, 0.7, 0.6, 0.7, 0.4, 0.2, 0.1, 0.05, 0.05, 0.03, 0.02],
-  [0.05, 0.02, 0.01, 0.01, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.3, 0.2, 0.3, 0.3, 0.2, 0.3, 0.2, 0.1, 0.05, 0.02, 0.02, 0.02, 0.01, 0.01],
-  [0.05, 0.02, 0.01, 0.01, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.3, 0.2, 0.3, 0.3, 0.2, 0.3, 0.2, 0.1, 0.05, 0.02, 0.02, 0.02, 0.01, 0.01],
-];
+export interface EnhancedUserRiskData {
+  id: string;
+  name: string;
+  email: string;
+  riskScore: number;
+  anomalies: number;
+  lastActive: Date;
+  status: string;
+}
 
-// Hours for heatmap x-axis
-export const hoursLabels = [
-  "0h", "1h", "2h", "3h", "4h", "5h", "6h", "7h", "8h", "9h", "10h", "11h", 
-  "12h", "13h", "14h", "15h", "16h", "17h", "18h", "19h", "20h", "21h", "22h", "23h"
-];
+export interface AlertData {
+  id: string;
+  timestamp: Date;
+  user: string;
+  activity: string;
+  riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
+  details: string;
+}
 
-// Days for heatmap y-axis
-export const daysLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-// Alert data for the alerts list
-export const alertsData = [
-  {
-    id: "alert-001",
-    title: "Unusual login time detected",
-    description: "User logged in outside normal working hours from unrecognized IP address",
-    severity: "high",
-    timestamp: "Today, 10:23 AM",
-    entity: "user1",
-    status: "new"
-  },
-  {
-    id: "alert-002",
-    title: "Excessive file access attempts",
-    description: "User accessed 230 files in 1 hour, significantly above baseline of 85 files",
-    severity: "high",
-    timestamp: "Today, 3:15 PM",
-    entity: "user2",
-    status: "investigating"
-  },
-  {
-    id: "alert-003",
-    title: "Multiple failed login attempts",
-    description: "17 failed login attempts detected from the same IP address",
-    severity: "medium",
-    timestamp: "Today, 10:05 AM",
-    entity: "user3",
-    status: "resolved"
-  },
-  {
-    id: "alert-004",
-    title: "User accessing sensitive data",
-    description: "User accessed financial reports outside normal permission pattern",
-    severity: "medium",
-    timestamp: "Yesterday, 4:32 PM",
-    entity: "user4",
-    status: "investigating"
-  },
-  {
-    id: "alert-005",
-    title: "Account lockout triggered",
-    description: "User account locked after multiple failed login attempts",
-    severity: "low",
-    timestamp: "Yesterday, 11:18 AM",
-    entity: "user5",
-    status: "resolved"
-  },
-  {
-    id: "alert-006",
-    title: "Mass file deletion detected",
-    description: "User deleted 47 files in 5 minutes, potential data destruction",
-    severity: "high",
-    timestamp: "Apr 6, 2025 - 9:40 AM",
-    entity: "user1",
-    status: "dismissed"
-  }
-] as any;
-
-// Mock data for users/entities
-export const usersData = [
-  {
-    id: "user-001",
-    name: "user1",
-    email: "user1@example.com",
-    department: "IT Administration",
-    role: "System Administrator",
-    riskScore: 0.75,
-    lastActive: "2025-04-07T10:23:15",
-    anomalies: 3,
-    status: "online"
-  },
-  {
-    id: "user-002",
-    name: "user2",
-    email: "user2@example.com",
-    department: "Engineering",
-    role: "Lead Developer",
-    riskScore: 0.85,
-    lastActive: "2025-04-07T15:10:22",
-    anomalies: 5,
-    status: "online"
-  },
-  {
-    id: "user-003",
-    name: "user3",
-    email: "user3@example.com",
-    department: "IT Security",
-    role: "Security Analyst",
-    riskScore: 0.42,
-    lastActive: "2025-04-07T09:55:47",
-    anomalies: 1,
-    status: "online"
-  },
-  {
-    id: "user-004",
-    name: "user4",
-    email: "user4@example.com",
-    department: "Finance",
-    role: "Senior Analyst",
-    riskScore: 0.55,
-    lastActive: "2025-04-06T16:32:10",
-    anomalies: 2,
-    status: "offline"
-  },
-  {
-    id: "user-005",
-    name: "user5",
-    email: "user5@example.com",
-    department: "Marketing",
-    role: "Marketing Intern",
-    riskScore: 0.25,
-    lastActive: "2025-04-06T11:18:40",
-    anomalies: 1,
-    status: "offline"
-  }
-];
-
-// Top entities with highest risk scores
-export const topRiskyEntities = [
-  { id: "user-002", name: "user2", department: "Engineering", riskScore: 0.85, trend: 0.12 },
-  { id: "user-001", name: "user1", department: "IT Administration", riskScore: 0.75, trend: 0.08 },
-  { id: "user-004", name: "user4", department: "Finance", riskScore: 0.55, trend: -0.03 },
-  { id: "user-003", name: "user3", department: "IT Security", riskScore: 0.42, trend: -0.05 },
-  { id: "user-005", name: "user5", department: "Marketing", riskScore: 0.25, trend: 0.01 }
-];
-
-// Mock dashboard stats
-export const dashboardStats = {
-  totalUsers: 250,
-  activeUsers: 172,
-  totalAnomalies: 14,
-  todayAnomalies: 5,
-  highRiskUsers: 12,
-  mediumRiskUsers: 28,
-  lowRiskUsers: 210,
-  averageRiskScore: 0.22
-};
-
-// Firewall logs data
 export interface FirewallLog {
   date: string;
   time: string;
   user: string;
+  srcip: string;
+  dstip: string;
   dstport: number;
+  protocol: string;
   duration: number;
   sentbyte: number;
   rcvdbyte: number;
   sentpkt: number;
   rcvdpkt: number;
+  flag: string;
+  tos: string;
 }
 
-export const firewallLogs: FirewallLog[] = [
-  { date: "9/14/2023", time: "17:30:23", user: "user1", dstport: 443, duration: 131, sentbyte: 2517, rcvdbyte: 7529, sentpkt: 8, rcvdpkt: 10 },
-  { date: "9/14/2023", time: "17:30:05", user: "user2", dstport: 443, duration: 3375, sentbyte: 7074, rcvdbyte: 62519, sentpkt: 106, rcvdpkt: 160 },
-  { date: "9/14/2023", time: "17:30:23", user: "user3", dstport: 443, duration: 246, sentbyte: 4928, rcvdbyte: 17525, sentpkt: 28, rcvdpkt: 26 },
-  { date: "9/14/2023", time: "17:29:56", user: "user4", dstport: 443, duration: 241, sentbyte: 2367, rcvdbyte: 3046, sentpkt: 20, rcvdpkt: 21 },
-  { date: "9/14/2023", time: "17:30:23", user: "user5", dstport: 443, duration: 157, sentbyte: 11420, rcvdbyte: 28991, sentpkt: 27, rcvdpkt: 49 },
-  { date: "9/14/2023", time: "17:30:05", user: "user1", dstport: 443, duration: 157, sentbyte: 5660, rcvdbyte: 2279, sentpkt: 16, rcvdpkt: 17 },
-  { date: "9/14/2023", time: "17:30:05", user: "user2", dstport: 53, duration: 181, sentbyte: 66, rcvdbyte: 82, sentpkt: 1, rcvdpkt: 1 },
-  { date: "9/14/2023", time: "17:29:56", user: "user3", dstport: 443, duration: 2944, sentbyte: 7185, rcvdbyte: 7919, sentpkt: 31, rcvdpkt: 45 },
-  { date: "9/14/2023", time: "17:30:05", user: "user4", dstport: 53, duration: 182, sentbyte: 69, rcvdbyte: 219, sentpkt: 1, rcvdpkt: 1 },
-  { date: "9/14/2023", time: "17:30:05", user: "user5", dstport: 443, duration: 68, sentbyte: 2449, rcvdbyte: 8203, sentpkt: 15, rcvdpkt: 16 },
-  { date: "9/14/2023", time: "17:30:23", user: "user1", dstport: 443, duration: 3407, sentbyte: 588186, rcvdbyte: 433044, sentpkt: 1993, rcvdpkt: 3187 },
-  { date: "9/14/2023", time: "17:29:56", user: "user2", dstport: 443, duration: 185, sentbyte: 7052, rcvdbyte: 16302, sentpkt: 19, rcvdpkt: 20 },
-  { date: "9/14/2023", time: "17:29:56", user: "user3", dstport: 443, duration: 6, sentbyte: 3103, rcvdbyte: 5591, sentpkt: 13, rcvdpkt: 14 },
-  { date: "9/14/2023", time: "17:29:56", user: "user4", dstport: 443, duration: 7, sentbyte: 6215, rcvdbyte: 1163840, sentpkt: 121, rcvdpkt: 916 },
-  { date: "9/14/2023", time: "17:29:56", user: "user5", dstport: 443, duration: 11, sentbyte: 2495, rcvdbyte: 99619, sentpkt: 31, rcvdpkt: 93 }
-];
+export interface NetworkActivityData {
+  timestamp: string;
+  sentBytes: number;
+  receivedBytes: number;
+  anomalyScore?: number;
+}
 
-// Enhanced user risk data with calculated risk factors
-export const enhancedUserRiskData = [
-  { 
-    id: "user-001", 
-    name: "user1", 
-    department: "IT Administration",
-    riskScore: 0.85, 
-    trend: 0.15,
-    riskFactors: [
-      { factor: "Unusual login times", weight: 0.3, score: 0.75 },
-      { factor: "Elevated privileges", weight: 0.25, score: 0.9 },
-      { factor: "File access volume", weight: 0.2, score: 0.8 },
-      { factor: "Network traffic", weight: 0.15, score: 0.95 },
-      { factor: "Failed logins", weight: 0.1, score: 0.7 },
-    ]
-  },
-  { 
-    id: "user-002", 
-    name: "user2", 
-    department: "Engineering",
-    riskScore: 0.92, 
-    trend: 0.08,
-    riskFactors: [
-      { factor: "Unusual login times", weight: 0.3, score: 0.9 },
-      { factor: "Elevated privileges", weight: 0.25, score: 0.95 },
-      { factor: "File access volume", weight: 0.2, score: 0.95 },
-      { factor: "Network traffic", weight: 0.15, score: 0.85 },
-      { factor: "Failed logins", weight: 0.1, score: 0.9 },
-    ]
-  },
-  { 
-    id: "user-003", 
-    name: "user3", 
-    department: "IT Security",
-    riskScore: 0.42, 
-    trend: -0.05,
-    riskFactors: [
-      { factor: "Unusual login times", weight: 0.3, score: 0.4 },
-      { factor: "Elevated privileges", weight: 0.25, score: 0.9 },
-      { factor: "File access volume", weight: 0.2, score: 0.2 },
-      { factor: "Network traffic", weight: 0.15, score: 0.25 },
-      { factor: "Failed logins", weight: 0.1, score: 0.1 },
-    ]
-  },
-  { 
-    id: "user-004", 
-    name: "user4", 
-    department: "Finance",
-    riskScore: 0.68, 
-    trend: 0.12,
-    riskFactors: [
-      { factor: "Unusual login times", weight: 0.3, score: 0.6 },
-      { factor: "Elevated privileges", weight: 0.25, score: 0.5 },
-      { factor: "File access volume", weight: 0.2, score: 0.95 },
-      { factor: "Network traffic", weight: 0.15, score: 0.6 },
-      { factor: "Failed logins", weight: 0.1, score: 0.8 },
-    ]
-  },
-  { 
-    id: "user-005", 
-    name: "user5", 
-    department: "Marketing",
-    riskScore: 0.25, 
-    trend: -0.1,
-    riskFactors: [
-      { factor: "Unusual login times", weight: 0.3, score: 0.2 },
-      { factor: "Elevated privileges", weight: 0.25, score: 0.1 },
-      { factor: "File access volume", weight: 0.2, score: 0.4 },
-      { factor: "Network traffic", weight: 0.15, score: 0.3 },
-      { factor: "Failed logins", weight: 0.1, score: 0.5 },
-    ]
-  }
-];
-
-// Calculate weighted risk scores
-export const calculateUserRiskScore = (riskFactors: Array<{factor: string, weight: number, score: number}>) => {
-  return riskFactors.reduce((total, factor) => total + (factor.weight * factor.score), 0);
-};
-
-// Log type interfaces for JSON upload functionality
+// Update the type definitions to include risk level
 export interface FileAccessLog {
-  Type: "File Access";
+  Type: string;
   Details: {
     Hostname: string;
     Date: string;
@@ -391,10 +82,11 @@ export interface FileAccessLog {
     Day: number;
     "Number of Files Accessed": number;
   };
+  RiskLevel?: string;
 }
 
 export interface LogonActivityLog {
-  Type: "Logon Activity";
+  Type: string;
   Details: {
     Hostname: string;
     Date: string;
@@ -405,10 +97,11 @@ export interface LogonActivityLog {
     "No. of Failed Login Attempts": number;
     "No. of Account Lockout Attempts": number;
   };
+  RiskLevel?: string;
 }
 
 export interface NetworkActivityLog {
-  Type: "Network Activity";
+  Type: string;
   Details: {
     date: string;
     time: string;
@@ -420,24 +113,387 @@ export interface NetworkActivityLog {
     sentpkt: number;
     rcvdpkt: number;
   };
+  RiskLevel?: string;
 }
 
-export type LogEntry = FileAccessLog | LogonActivityLog | NetworkActivityLog;
+export const dashboardStats: DashboardStats = {
+  totalUsers: 245,
+  activeUsers: 187,
+  todayAnomalies: 12,
+  totalAnomalies: 85,
+  highRiskUsers: 5,
+  mediumRiskUsers: 18,
+  lowRiskUsers: 222,
+  averageRiskScore: 0.28,
+};
 
-// Initialize empty arrays for uploaded log data
-export let uploadedFileAccessLogs: FileAccessLog[] = [];
-export let uploadedLogonActivityLogs: LogonActivityLog[] = [];
-export let uploadedNetworkActivityLogs: NetworkActivityLog[] = [];
+export const loginActivityData: AnomalyTrendData[] = [
+  { timestamp: '00:00', value: 120, anomalyScore: 0.1 },
+  { timestamp: '01:00', value: 90, anomalyScore: 0.05 },
+  { timestamp: '02:00', value: 80, anomalyScore: 0.03 },
+  { timestamp: '03:00', value: 75, anomalyScore: 0.02 },
+  { timestamp: '04:00', value: 82, anomalyScore: 0.04 },
+  { timestamp: '05:00', value: 110, anomalyScore: 0.07 },
+  { timestamp: '06:00', value: 220, anomalyScore: 0.2 },
+  { timestamp: '07:00', value: 350, anomalyScore: 0.3 },
+  { timestamp: '08:00', value: 420, anomalyScore: 0.35 },
+  { timestamp: '09:00', value: 380, anomalyScore: 0.32 },
+  { timestamp: '10:00', value: 390, anomalyScore: 0.33 },
+  { timestamp: '11:00', value: 410, anomalyScore: 0.34 },
+  { timestamp: '12:00', value: 450, anomalyScore: 0.38 },
+  { timestamp: '13:00', value: 430, anomalyScore: 0.36 },
+  { timestamp: '14:00', value: 400, anomalyScore: 0.33 },
+  { timestamp: '15:00', value: 370, anomalyScore: 0.3 },
+  { timestamp: '16:00', value: 390, anomalyScore: 0.32 },
+  { timestamp: '17:00', value: 410, anomalyScore: 0.34 },
+  { timestamp: '18:00', value: 380, anomalyScore: 0.31 },
+  { timestamp: '19:00', value: 350, anomalyScore: 0.28 },
+  { timestamp: '20:00', value: 300, anomalyScore: 0.25 },
+  { timestamp: '21:00', value: 250, anomalyScore: 0.2 },
+  { timestamp: '22:00', value: 180, anomalyScore: 0.15 },
+  { timestamp: '23:00', value: 150, anomalyScore: 0.12 },
+];
 
-// Function to process and categorize uploaded logs
-export const processUploadedLogs = (logs: LogEntry[]) => {
-  uploadedFileAccessLogs = logs.filter((log): log is FileAccessLog => log.Type === "File Access");
-  uploadedLogonActivityLogs = logs.filter((log): log is LogonActivityLog => log.Type === "Logon Activity");
-  uploadedNetworkActivityLogs = logs.filter((log): log is NetworkActivityLog => log.Type === "Network Activity");
-  
-  return {
-    fileAccessLogs: uploadedFileAccessLogs,
-    logonActivityLogs: uploadedLogonActivityLogs,
-    networkActivityLogs: uploadedNetworkActivityLogs
-  };
+export const failedLoginData: AnomalyTrendData[] = [
+  { timestamp: '00:00', value: 5, anomalyScore: 0.01 },
+  { timestamp: '01:00', value: 3, anomalyScore: 0.01 },
+  { timestamp: '02:00', value: 2, anomalyScore: 0.01 },
+  { timestamp: '03:00', value: 1, anomalyScore: 0.01 },
+  { timestamp: '04:00', value: 2, anomalyScore: 0.01 },
+  { timestamp: '05:00', value: 4, anomalyScore: 0.02 },
+  { timestamp: '06:00', value: 8, anomalyScore: 0.05 },
+  { timestamp: '07:00', value: 15, anomalyScore: 0.1 },
+  { timestamp: '08:00', value: 7, anomalyScore: 0.04 },
+  { timestamp: '09:00', value: 3, anomalyScore: 0.02 },
+  { timestamp: '10:00', value: 2, anomalyScore: 0.01 },
+  { timestamp: '11:00', value: 1, anomalyScore: 0.01 },
+  { timestamp: '12:00', value: 3, anomalyScore: 0.02 },
+  { timestamp: '13:00', value: 5, anomalyScore: 0.03 },
+  { timestamp: '14:00', value: 4, anomalyScore: 0.02 },
+  { timestamp: '15:00', value: 2, anomalyScore: 0.01 },
+  { timestamp: '16:00', value: 3, anomalyScore: 0.02 },
+  { timestamp: '17:00', value: 6, anomalyScore: 0.04 },
+  { timestamp: '18:00', value: 4, anomalyScore: 0.02 },
+  { timestamp: '19:00', value: 2, anomalyScore: 0.01 },
+  { timestamp: '20:00', value: 1, anomalyScore: 0.01 },
+  { timestamp: '21:00', value: 3, anomalyScore: 0.02 },
+  { timestamp: '22:00', value: 6, anomalyScore: 0.04 },
+  { timestamp: '23:00', value: 4, anomalyScore: 0.02 },
+];
+
+export const fileAccessData: AnomalyTrendData[] = [
+  { timestamp: '00:00', value: 30, anomalyScore: 0.01 },
+  { timestamp: '01:00', value: 25, anomalyScore: 0.01 },
+  { timestamp: '02:00', value: 20, anomalyScore: 0.01 },
+  { timestamp: '03:00', value: 15, anomalyScore: 0.01 },
+  { timestamp: '04:00', value: 18, anomalyScore: 0.01 },
+  { timestamp: '05:00', value: 35, anomalyScore: 0.02 },
+  { timestamp: '06:00', value: 70, anomalyScore: 0.05 },
+  { timestamp: '07:00', value: 120, anomalyScore: 0.1 },
+  { timestamp: '08:00', value: 150, anomalyScore: 0.12 },
+  { timestamp: '09:00', value: 130, anomalyScore: 0.1 },
+  { timestamp: '10:00', value: 140, anomalyScore: 0.11 },
+  { timestamp: '11:00', value: 160, anomalyScore: 0.13 },
+  { timestamp: '12:00', value: 180, anomalyScore: 0.15 },
+  { timestamp: '13:00', value: 170, anomalyScore: 0.14 },
+  { timestamp: '14:00', value: 150, anomalyScore: 0.12 },
+  { timestamp: '15:00', value: 130, anomalyScore: 0.1 },
+  { timestamp: '16:00', value: 140, anomalyScore: 0.11 },
+  { timestamp: '17:00', value: 160, anomalyScore: 0.13 },
+  { timestamp: '18:00', value: 140, anomalyScore: 0.11 },
+  { timestamp: '19:00', value: 120, anomalyScore: 0.1 },
+  { timestamp: '20:00', value: 90, anomalyScore: 0.07 },
+  { timestamp: '21:00', value: 70, anomalyScore: 0.05 },
+  { timestamp: '22:00', value: 50, anomalyScore: 0.03 },
+  { timestamp: '23:00', value: 40, anomalyScore: 0.02 },
+];
+
+export const hoursLabels = [
+  '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00',
+  '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00',
+  '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00',
+  '21:00', '22:00', '23:00'
+];
+
+export const daysLabels = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+];
+
+export const loginHeatmapData: ActivityHeatmapData[] = [];
+
+// Generate heatmap data
+for (const day of daysLabels) {
+  for (const hour of hoursLabels) {
+    const value = Math.floor(Math.random() * 20); // Generate a random value for each cell
+    loginHeatmapData.push({ day: day, hour: hour, value: value });
+  }
+}
+
+export const userRiskData: UserRiskData[] = [
+  { id: 'user1', name: 'Alice Johnson', riskScore: 0.15 },
+  { id: 'user2', name: 'Bob Williams', riskScore: 0.45 },
+  { id: 'user3', name: 'Charlie Brown', riskScore: 0.75 },
+  { id: 'user4', name: 'Diana Miller', riskScore: 0.25 },
+  { id: 'user5', name: 'Ethan Davis', riskScore: 0.60 },
+];
+
+export const enhancedUserRiskData: EnhancedUserRiskData[] = [
+  { id: 'user1', name: 'Alice Johnson', email: 'alice.johnson@example.com', riskScore: 0.15, anomalies: 0, lastActive: faker.date.past(), status: 'online' },
+  { id: 'user2', name: 'Bob Williams', email: 'bob.williams@example.com', riskScore: 0.45, anomalies: 2, lastActive: faker.date.past(), status: 'offline' },
+  { id: 'user3', name: 'Charlie Brown', email: 'charlie.brown@example.com', riskScore: 0.75, anomalies: 5, lastActive: faker.date.past(), status: 'online' },
+  { id: 'user4', name: 'Diana Miller', email: 'diana.miller@example.com', riskScore: 0.25, anomalies: 1, lastActive: faker.date.past(), status: 'offline' },
+  { id: 'user5', name: 'Ethan Davis', email: 'ethan.davis@example.com', riskScore: 0.60, anomalies: 3, lastActive: faker.date.past(), status: 'online' },
+  { id: 'user6', name: 'Fiona White', email: 'fiona.white@example.com', riskScore: 0.30, anomalies: 0, lastActive: faker.date.past(), status: 'online' },
+  { id: 'user7', name: 'George Black', email: 'george.black@example.com', riskScore: 0.85, anomalies: 7, lastActive: faker.date.past(), status: 'offline' },
+  { id: 'user8', name: 'Hannah Green', email: 'hannah.green@example.com', riskScore: 0.50, anomalies: 2, lastActive: faker.date.past(), status: 'online' },
+  { id: 'user9', name: 'Isaac Blue', email: 'isaac.blue@example.com', riskScore: 0.20, anomalies: 0, lastActive: faker.date.past(), status: 'offline' },
+  { id: 'user10', name: 'Julia Red', email: 'julia.red@example.com', riskScore: 0.70, anomalies: 4, lastActive: faker.date.past(), status: 'online' },
+];
+
+export const alertsData: AlertData[] = [
+  {
+    id: 'alert1',
+    timestamp: faker.date.recent(),
+    user: 'Charlie Brown',
+    activity: 'Multiple failed login attempts',
+    riskLevel: 'High',
+    details: 'User Charlie Brown had 5 failed login attempts in the last hour.'
+  },
+  {
+    id: 'alert2',
+    timestamp: faker.date.recent(),
+    user: 'Bob Williams',
+    activity: 'Unusual file access',
+    riskLevel: 'Medium',
+    details: 'User Bob Williams accessed a sensitive file outside of normal working hours.'
+  },
+  {
+    id: 'alert3',
+    timestamp: faker.date.recent(),
+    user: 'Alice Johnson',
+    activity: 'New device login',
+    riskLevel: 'Low',
+    details: 'User Alice Johnson logged in from a new device.'
+  },
+  {
+    id: 'alert4',
+    timestamp: faker.date.recent(),
+    user: 'Ethan Davis',
+    activity: 'Privilege escalation',
+    riskLevel: 'Critical',
+    details: 'User Ethan Davis attempted to escalate privileges.'
+  },
+  {
+    id: 'alert5',
+    timestamp: faker.date.recent(),
+    user: 'Diana Miller',
+    activity: 'Data exfiltration',
+    riskLevel: 'High',
+    details: 'User Diana Miller sent a large amount of data outside the network.'
+  },
+];
+
+export const firewallLogs: FirewallLog[] = [];
+
+// Generate firewall log data
+for (let i = 0; i < 25; i++) {
+  firewallLogs.push({
+    date: faker.date.recent().toLocaleDateString(),
+    time: faker.date.recent().toLocaleTimeString(),
+    user: faker.internet.userName(),
+    srcip: faker.internet.ip(),
+    dstip: faker.internet.ip(),
+    dstport: faker.internet.port(),
+    protocol: faker.internet.protocol(),
+    duration: faker.datatype.number({ min: 10, max: 1000 }),
+    sentbyte: faker.datatype.number({ min: 100, max: 100000 }),
+    rcvdbyte: faker.datatype.number({ min: 100, max: 100000 }),
+    sentpkt: faker.datatype.number({ min: 1, max: 100 }),
+    rcvdpkt: faker.datatype.number({ min: 1, max: 100 }),
+    flag: faker.random.word(),
+    tos: faker.random.word(),
+  });
+}
+
+export const networkActivityData: NetworkActivityData[] = [
+  { timestamp: '00:00', sentBytes: 50000, receivedBytes: 75000, anomalyScore: 0.1 },
+  { timestamp: '01:00', sentBytes: 45000, receivedBytes: 68000, anomalyScore: 0.05 },
+  { timestamp: '02:00', sentBytes: 40000, receivedBytes: 62000, anomalyScore: 0.03 },
+  { timestamp: '03:00', sentBytes: 38000, receivedBytes: 58000, anomalyScore: 0.02 },
+  { timestamp: '04:00', sentBytes: 42000, receivedBytes: 65000, anomalyScore: 0.04 },
+  { timestamp: '05:00', sentBytes: 60000, receivedBytes: 88000, anomalyScore: 0.07 },
+  { timestamp: '06:00', sentBytes: 120000, receivedBytes: 150000, anomalyScore: 0.2 },
+  { timestamp: '07:00', sentBytes: 180000, receivedBytes: 220000, anomalyScore: 0.3 },
+  { timestamp: '08:00', sentBytes: 220000, receivedBytes: 250000, anomalyScore: 0.35 },
+  { timestamp: '09:00', sentBytes: 200000, receivedBytes: 230000, anomalyScore: 0.32 },
+  { timestamp: '10:00', sentBytes: 210000, receivedBytes: 240000, anomalyScore: 0.33 },
+  { timestamp: '11:00', sentBytes: 230000, receivedBytes: 260000, anomalyScore: 0.34 },
+  { timestamp: '12:00', sentBytes: 250000, receivedBytes: 280000, anomalyScore: 0.38 },
+  { timestamp: '13:00', sentBytes: 240000, receivedBytes: 270000, anomalyScore: 0.36 },
+  { timestamp: '14:00', sentBytes: 220000, receivedBytes: 250000, anomalyScore: 0.33 },
+  { timestamp: '15:00', sentBytes: 200000, receivedBytes: 230000, anomalyScore: 0.3 },
+  { timestamp: '16:00', sentBytes: 210000, receivedBytes: 240000, anomalyScore: 0.32 },
+  { timestamp: '17:00', sentBytes: 230000, receivedBytes: 260000, anomalyScore: 0.34 },
+  { timestamp: '18:00', sentBytes: 210000, receivedBytes: 240000, anomalyScore: 0.31 },
+  { timestamp: '19:00', sentBytes: 190000, receivedBytes: 220000, anomalyScore: 0.28 },
+  { timestamp: '20:00', sentBytes: 160000, receivedBytes: 190000, anomalyScore: 0.25 },
+  { timestamp: '21:00', sentBytes: 130000, receivedBytes: 160000, anomalyScore: 0.2 },
+  { timestamp: '22:00', sentBytes: 90000, receivedBytes: 120000, anomalyScore: 0.15 },
+  { timestamp: '23:00', sentBytes: 70000, receivedBytes: 100000, anomalyScore: 0.12 },
+];
+
+// Make sure we properly export uploadedLogs with risk levels included
+export const uploadedFileAccessLogs: FileAccessLog[] = [
+  {
+    Type: "File Access",
+    Details: {
+      Hostname: "User1",
+      Date: "",
+      "Time Period": 3,
+      Day: 5,
+      "Number of Files Accessed": 9
+    },
+    RiskLevel: "Low"
+  },
+  {
+    Type: "File Access",
+    Details: {
+      Hostname: "User2",
+      Date: "",
+      "Time Period": 2,
+      Day: 3,
+      "Number of Files Accessed": 15
+    },
+    RiskLevel: "Medium"
+  },
+  {
+    Type: "File Access",
+    Details: {
+      Hostname: "Admin1",
+      Date: "",
+      "Time Period": 4,
+      Day: 1,
+      "Number of Files Accessed": 27
+    },
+    RiskLevel: "High"
+  },
+];
+
+export const uploadedLogonActivityLogs: LogonActivityLog[] = [
+  {
+    Type: "Logon Activity",
+    Details: {
+      Hostname: "Yeti",
+      Date: "3/28/2025",
+      "Time Period": 1,
+      Day: 5,
+      "No. of Logins": 31,
+      "No. of Logouts": 2,
+      "No. of Failed Login Attempts": 0,
+      "No. of Account Lockout Attempts": 0
+    },
+    RiskLevel: "Low"
+  },
+  {
+    Type: "Logon Activity",
+    Details: {
+      Hostname: "Wolf",
+      Date: "3/28/2025",
+      "Time Period": 2,
+      Day: 5,
+      "No. of Logins": 12,
+      "No. of Logouts": 10,
+      "No. of Failed Login Attempts": 3,
+      "No. of Account Lockout Attempts": 0
+    },
+    RiskLevel: "Medium"
+  },
+  {
+    Type: "Logon Activity",
+    Details: {
+      Hostname: "Fox",
+      Date: "3/29/2025",
+      "Time Period": 4,
+      Day: 6,
+      "No. of Logins": 8,
+      "No. of Logouts": 8,
+      "No. of Failed Login Attempts": 7,
+      "No. of Account Lockout Attempts": 1
+    },
+    RiskLevel: "High"
+  },
+];
+
+export const uploadedNetworkActivityLogs: NetworkActivityLog[] = [
+  {
+    Type: "Network Activity",
+    Details: {
+      date: "9/14/2023",
+      time: "17:30:23",
+      user: "user1",
+      dstport: 443,
+      duration: 131,
+      sentbyte: 2517,
+      rcvdbyte: 7529,
+      sentpkt: 8,
+      rcvdpkt: 10
+    },
+    RiskLevel: "Low"
+  },
+  {
+    Type: "Network Activity",
+    Details: {
+      date: "9/14/2023",
+      time: "17:31:45",
+      user: "user2",
+      dstport: 80,
+      duration: 95,
+      sentbyte: 1834,
+      rcvdbyte: 15420,
+      sentpkt: 12,
+      rcvdpkt: 18
+    },
+    RiskLevel: "Medium"
+  },
+  {
+    Type: "Network Activity",
+    Details: {
+      date: "9/14/2023",
+      time: "17:33:12",
+      user: "admin1",
+      dstport: 22,
+      duration: 312,
+      sentbyte: 125670,
+      rcvdbyte: 4328,
+      sentpkt: 86,
+      rcvdpkt: 42
+    },
+    RiskLevel: "Critical"
+  },
+];
+
+export const topRiskyEntities = [
+  { id: 'user1', name: 'Alice Johnson', riskScore: 0.75 },
+  { id: 'server2', name: 'Database Server', riskScore: 0.68 },
+  { id: 'device3', name: 'IoT Device XYZ', riskScore: 0.55 },
+  { id: 'user4', name: 'Bob Williams', riskScore: 0.42 },
+  { id: 'network5', name: 'Guest Network', riskScore: 0.30 },
+];
+
+export const processUploadedLogs = (logs: any[]) => {
+  const fileAccessLogs: FileAccessLog[] = [];
+  const logonActivityLogs: LogonActivityLog[] = [];
+  const networkActivityLogs: NetworkActivityLog[] = [];
+
+  logs.forEach(log => {
+    if (log.Type === "File Access") {
+      fileAccessLogs.push(log as FileAccessLog);
+    } else if (log.Type === "Logon Activity") {
+      logonActivityLogs.push(log as LogonActivityLog);
+    } else if (log.Type === "Network Activity") {
+      networkActivityLogs.push(log as NetworkActivityLog);
+    }
+  });
+
+  return { fileAccessLogs, logonActivityLogs, networkActivityLogs };
 };

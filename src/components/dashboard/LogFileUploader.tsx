@@ -1,12 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, FileJson, Download, FileText } from 'lucide-react';
-import { toast } from 'sonner';
-import { processUploadedLogs } from '@/services/mockData';
-import { jsPDF } from 'jspdf';
+import { FileText, Download, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { jsPDF } from 'jspdf';
+import { fetchLogs } from '@/services/logService';
 
 interface LogFileUploaderProps {
   onLogsProcessed: (fileAccessCount: number, logonActivityCount: number, networkActivityCount: number) => void;
@@ -14,27 +13,20 @@ interface LogFileUploaderProps {
 }
 
 const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, className }) => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [hasUploadedData, setHasUploadedData] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [hasData, setHasData] = useState(false);
+  const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const { toast } = useToast();
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsProcessing(true);
+  const fetchLogData = async () => {
+    setIsFetching(true);
     
     try {
-      const content = await file.text();
-      // Parse each line as a separate JSON object (handle newline-delimited JSON)
-      const logs = content
-        .split('\n')
-        .filter(line => line.trim())
-        .map(line => JSON.parse(line));
+      const { fileAccessLogs, logonActivityLogs, networkActivityLogs } = await fetchLogs();
       
-      const { fileAccessLogs, logonActivityLogs, networkActivityLogs } = processUploadedLogs(logs);
+      setHasData(true);
+      setLastFetched(new Date());
       
-      setHasUploadedData(true);
       onLogsProcessed(
         fileAccessLogs.length, 
         logonActivityLogs.length, 
@@ -42,22 +34,25 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
       );
       
       toast({
-        title: "Log file processed successfully",
+        title: "Logs fetched successfully",
         description: `Found ${fileAccessLogs.length} file access logs, ${logonActivityLogs.length} logon activity logs, and ${networkActivityLogs.length} network activity logs.`,
       });
     } catch (error) {
-      console.error('Error processing log file:', error);
+      console.error('Error fetching logs:', error);
       toast({
-        title: "Error processing log file",
-        description: "Please make sure the file contains valid JSON data.",
+        title: "Error fetching logs",
+        description: "Could not connect to the log server. Please try again.",
         variant: "destructive",
       });
     } finally {
-      setIsProcessing(false);
-      // Reset the file input
-      e.target.value = '';
+      setIsFetching(false);
     }
   };
+
+  // Fetch logs on component mount
+  useEffect(() => {
+    fetchLogData();
+  }, []);
 
   const generatePDFReport = () => {
     toast({
@@ -73,7 +68,7 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
       doc.text("Generated on: " + new Date().toLocaleString(), 20, 30);
       
       // Add more sections and visualizations based on log data
-      doc.text("This report contains analysis of uploaded log files", 20, 40);
+      doc.text("This report contains analysis of fetched log files", 20, 40);
       
       doc.save("security-log-report.pdf");
       
@@ -88,33 +83,32 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
     <Card className={`cyber-border backdrop-blur-sm scanning-effect ${className}`}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2">
-          <FileJson className="h-5 w-5" />
-          Log File Processor
+          <FileText className="h-5 w-5" />
+          Log Data Processor
         </CardTitle>
-        <CardDescription>Upload JSON log files for analysis</CardDescription>
+        <CardDescription>
+          Fetches and analyzes log data from server
+          {lastFetched && (
+            <span className="block text-xs mt-1 text-muted-foreground">
+              Last fetched: {lastFetched.toLocaleString()}
+            </span>
+          )}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="flex flex-col space-y-2">
             <Button 
               variant="outline" 
-              className="w-full relative overflow-hidden"
-              disabled={isProcessing}
-              onClick={() => document.getElementById('log-file-input')?.click()}
+              className="w-full relative"
+              disabled={isFetching}
+              onClick={fetchLogData}
             >
-              <Upload className="mr-2 h-4 w-4" />
-              <span>{isProcessing ? "Processing..." : "Upload JSON Log File"}</span>
-              <input 
-                type="file" 
-                id="log-file-input"
-                accept=".json, .txt"
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                onChange={handleFileUpload}
-                disabled={isProcessing}
-              />
+              <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+              <span>{isFetching ? "Fetching logs..." : "Refresh Log Data"}</span>
             </Button>
             
-            {hasUploadedData && (
+            {hasData && (
               <Button 
                 variant="secondary"
                 className="w-full"
@@ -127,8 +121,8 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
           </div>
           
           <div className="text-xs text-muted-foreground">
-            <p>Supported format: JSON logs with Type and Details fields</p>
-            <p className="mt-1">Example: {'{"Type":"File Access","Details":{"Hostname":"User1","Date":"","Time Period":3,"Day":5,"Number of Files Accessed":9}}'}</p>
+            <p>Connected to log server: localhost</p>
+            <p className="mt-1">Parsing File Access, Logon Activity, and Network Activity logs</p>
           </div>
         </div>
       </CardContent>
