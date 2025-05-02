@@ -123,18 +123,24 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
               >
                 <BarChart
                   data={chartData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 30 }}
+                  margin={{ top: 20, right: 30, left: 75, bottom: 30 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis 
                     dataKey="user"
-                    tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 12 }} 
+                    tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 11 }} 
                     stroke="rgba(255,255,255,0.1)"
+                    height={50}
+                    tickMargin={10}
+                    interval={0}
+                    textAnchor="end"
+                    angle={-35}
                   />
                   <YAxis 
                     tick={{ fill: 'rgba(255,255,255,0.6)' }} 
                     stroke="rgba(255,255,255,0.1)"
                     tickFormatter={formatBytes}
+                    width={70}
                   />
                   <Tooltip
                     formatter={(value: number) => [formatBytes(value), '']}
@@ -160,17 +166,20 @@ const NetworkActivityVisualization: React.FC<NetworkActivityVisualizationProps> 
               >
                 <BarChart
                   data={portData.slice(0, 10)}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 30 }}
+                  margin={{ top: 20, right: 30, left: 40, bottom: 30 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis 
                     dataKey="port"
                     tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 12 }} 
                     stroke="rgba(255,255,255,0.1)"
+                    height={40}
+                    tickMargin={10}
                   />
                   <YAxis 
                     tick={{ fill: 'rgba(255,255,255,0.6)' }} 
                     stroke="rgba(255,255,255,0.1)"
+                    width={40}
                   />
                   <Tooltip
                     contentStyle={{
