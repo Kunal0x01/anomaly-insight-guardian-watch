@@ -29,7 +29,10 @@ const riskLevels = {
   "user1": "Low",
   "user2": "Medium",
   "user3": "Low",
-  "admin1": "Critical"
+  "admin1": "Critical",
+  "Krak": "High",
+  "jugnu": "Medium",
+  "KunalG": "High"
 };
 
 // Convert the raw logs to the format expected by our application
