@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, FileJson, Download, FilePdf } from 'lucide-react';
+import { Upload, FileJson, Download, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { processUploadedLogs } from '@/services/mockData';
 import { jsPDF } from 'jspdf';
@@ -120,7 +120,7 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
                 className="w-full"
                 onClick={generatePDFReport}
               >
-                <FilePdf className="mr-2 h-4 w-4" />
+                <FileText className="mr-2 h-4 w-4" />
                 Download PDF Report
               </Button>
             )}
