@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
-interface RiskFactor {
+export interface RiskFactor {
   factor: string;
   weight: number;
   score: number;

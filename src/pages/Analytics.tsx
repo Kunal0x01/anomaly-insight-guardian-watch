@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AnomalyTrend from "@/components/dashboard/AnomalyTrend";
 import NetworkActivityGraph from "@/components/dashboard/NetworkActivityGraph";
-import UserRiskFactors from "@/components/dashboard/UserRiskFactors";
+import UserRiskFactors, { RiskFactor } from "@/components/dashboard/UserRiskFactors";
 import { fileAccessData, failedLoginData, loginActivityData, enhancedUserRiskData, networkActivityData } from "@/services/mockData";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, Cell } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -41,6 +41,15 @@ const Analytics = () => {
   const [selectedUser, setSelectedUser] = useState(enhancedUserRiskData[0].id);
   
   const selectedUserData = enhancedUserRiskData.find(user => user.id === selectedUser) || enhancedUserRiskData[0];
+
+  // Transform risk factors to match the expected format
+  const transformRiskFactors = (factors: { category: string; value: number }[]): RiskFactor[] => {
+    return factors.map(factor => ({
+      factor: factor.category,
+      weight: 0.2, // Equal weight distribution for all factors
+      score: factor.value
+    }));
+  };
 
   return (
     <DashboardLayout>
@@ -204,7 +213,7 @@ const Analytics = () => {
             <UserRiskFactors
               userId={selectedUserData.id}
               userName={selectedUserData.name}
-              factors={selectedUserData.riskFactors || defaultRiskFactors}
+              factors={transformRiskFactors(selectedUserData.riskFactors || defaultRiskFactors)}
             />
           </CardContent>
         </Card>

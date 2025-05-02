@@ -156,12 +156,15 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2">
           <AlertList 
-            alerts={alertsData.map(alert => ({
+            alerts={alertsData.filter(alert => 
+              // Filter out any alerts with "critical" severity since Alert component doesn't support it
+              alert.severity !== "critical" ? true : false
+            ).map(alert => ({
               id: alert.id,
               title: alert.title,
               description: alert.description,
               timestamp: alert.timestamp,
-              severity: alert.severity,
+              severity: alert.severity === "critical" ? "high" : alert.severity,
               entity: alert.entity,
               status: alert.status
             }))} 

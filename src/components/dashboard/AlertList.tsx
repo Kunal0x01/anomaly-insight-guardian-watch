@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +8,7 @@ export interface Alert {
   id: string;
   title: string;
   description: string;
-  severity: "low" | "medium" | "high";
+  severity: "low" | "medium" | "high" | "critical";
   timestamp: string;
   entity: string;
   status: "new" | "investigating" | "resolved" | "dismissed";
@@ -40,6 +39,8 @@ const AlertList = ({
         return "bg-anomaly-medium/10 text-anomaly-medium border-anomaly-medium/40";
       case "high":
         return "bg-anomaly-high/10 text-anomaly-high border-anomaly-high/40";
+      case "critical":
+        return "bg-red-600/10 text-red-500 border-red-600/40";
       default:
         return "bg-muted text-muted-foreground";
     }
