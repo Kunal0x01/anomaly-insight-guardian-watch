@@ -2,9 +2,19 @@
 import { 
   FileAccessLog, 
   LogonActivityLog, 
-  NetworkActivityLog, 
-  processUploadedLogs 
+  NetworkActivityLog 
 } from './mockData';
+
+// Configuration for log server connection
+export const logServerConfig = {
+  ip: "localhost", // Default to localhost for development
+  port: 8000,      // Default port
+};
+
+// Utility to get the full server URL
+export const getLogServerUrl = () => {
+  return `http://${logServerConfig.ip}:${logServerConfig.port}`;
+};
 
 // Mock data for now - in a real app, this would make actual API calls to the specified IP/port
 const fileAccessLogsRaw = [
@@ -96,7 +106,8 @@ function convertNetworkActivityLogs(rawLogs: any[]): NetworkActivityLog[] {
 
 export async function fetchLogs() {
   // In a real app, this would make actual API calls to the specified IP/port
-  // For now, we'll use mock data and simulate network delay
+  console.log(`Fetching logs from: ${getLogServerUrl()}`);
+  
   return new Promise<{
     fileAccessLogs: FileAccessLog[],
     logonActivityLogs: LogonActivityLog[],

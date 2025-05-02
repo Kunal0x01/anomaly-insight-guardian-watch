@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Download, RefreshCw } from 'lucide-react';
+import { FileText, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { jsPDF } from 'jspdf';
-import { fetchLogs } from '@/services/logService';
+import { fetchLogs, logServerConfig, getLogServerUrl } from '@/services/logService';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface LogFileUploaderProps {
   onLogsProcessed: (fileAccessCount: number, logonActivityCount: number, networkActivityCount: number) => void;
@@ -17,11 +19,20 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
   const [hasData, setHasData] = useState(false);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const { toast } = useToast();
+  
+  // Server configuration state
+  const [serverIp, setServerIp] = useState(logServerConfig.ip);
+  const [serverPort, setServerPort] = useState(logServerConfig.port.toString());
+  const [showConfig, setShowConfig] = useState(false);
 
   const fetchLogData = async () => {
     setIsFetching(true);
     
     try {
+      // Update config with latest values
+      logServerConfig.ip = serverIp;
+      logServerConfig.port = parseInt(serverPort);
+      
       const { fileAccessLogs, logonActivityLogs, networkActivityLogs } = await fetchLogs();
       
       setHasData(true);
@@ -41,7 +52,7 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
       console.error('Error fetching logs:', error);
       toast({
         title: "Error fetching logs",
-        description: "Could not connect to the log server. Please try again.",
+        description: `Could not connect to log server at ${getLogServerUrl()}. Please check your connection settings.`,
         variant: "destructive",
       });
     } finally {
@@ -118,11 +129,44 @@ const LogFileUploader: React.FC<LogFileUploaderProps> = ({ onLogsProcessed, clas
                 Download PDF Report
               </Button>
             )}
+            
+            <Button
+              variant="ghost"
+              className="w-full text-xs"
+              onClick={() => setShowConfig(!showConfig)}
+            >
+              {showConfig ? "Hide Server Settings" : "Configure Server Connection"}
+            </Button>
           </div>
           
+          {showConfig && (
+            <div className="space-y-3 p-3 border border-border/30 rounded-md">
+              <div className="space-y-2">
+                <Label htmlFor="server-ip">Log Server IP</Label>
+                <Input 
+                  id="server-ip"
+                  value={serverIp}
+                  onChange={(e) => setServerIp(e.target.value)}
+                  placeholder="e.g., localhost or 192.168.1.100"
+                  className="h-8"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="server-port">Log Server Port</Label>
+                <Input 
+                  id="server-port"
+                  value={serverPort}
+                  onChange={(e) => setServerPort(e.target.value)}
+                  placeholder="e.g., 8000"
+                  className="h-8"
+                />
+              </div>
+            </div>
+          )}
+          
           <div className="text-xs text-muted-foreground">
-            <p>Connected to log server: localhost</p>
-            <p className="mt-1">Parsing File Access, Logon Activity, and Network Activity logs</p>
+            <p>Connected to log server: {getLogServerUrl()}</p>
+            <p className="mt-1">Parsing File_access_log.ndjson, Login_event_log.ndjson, and Network_access_log.ndjson</p>
           </div>
         </div>
       </CardContent>
