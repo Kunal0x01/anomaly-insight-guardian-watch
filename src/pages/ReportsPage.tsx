@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -690,4 +691,65 @@ const ReportsPage = () => {
                                       <span className={`px-1.5 py-0.5 rounded-full ${
                                         user.riskScore > 0.8 ? 'bg-red-900/30 text-red-400' : 
                                         user.riskScore > 0.6 ? 'bg-orange-900/30 text-orange-400' :
-                                        user.riskScore > 0.4 ? 'bg-amber-900/30 text-
+                                        user.riskScore > 0.4 ? 'bg-amber-900/30 text-amber-400' :
+                                        'bg-green-900/30 text-green-400'
+                                      }`}>
+                                        Risk Score: {user.riskScore.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <Button size="sm" variant="outline" className="h-7">
+                                    Investigate
+                                  </Button>
+                                </div>
+                                <Progress 
+                                  value={user.riskScore * 100}
+                                  className={`h-1 mt-2 ${
+                                    user.riskScore > 0.8 ? 'bg-red-900/20' : 
+                                    user.riskScore > 0.6 ? 'bg-orange-900/20' :
+                                    user.riskScore > 0.4 ? 'bg-amber-900/20' :
+                                    'bg-green-900/20'
+                                  }`}
+                                  indicatorClassName={
+                                    user.riskScore > 0.8 ? 'bg-red-500' : 
+                                    user.riskScore > 0.6 ? 'bg-orange-500' :
+                                    user.riskScore > 0.4 ? 'bg-amber-500' :
+                                    'bg-green-500'
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="recent">
+              <div className="p-4 text-center text-muted-foreground">
+                <p>Your previous reports will appear here.</p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="scheduled">
+              <div className="p-4 text-center text-muted-foreground">
+                <p>Set up automated report generation on a schedule.</p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="templates">
+              <div className="p-4 text-center text-muted-foreground">
+                <p>Customize and save report templates for future use.</p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </DashboardLayout>
+    </>
+  );
+};
+
+export default ReportsPage;
