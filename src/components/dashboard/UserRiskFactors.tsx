@@ -3,6 +3,13 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { Info } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export interface RiskFactor {
   factor: string;
@@ -91,7 +98,19 @@ const UserRiskFactors: React.FC<UserRiskFactorsProps> = ({
         </div>
 
         <div className="mt-4 p-3 border border-border/30 rounded-md bg-secondary/20">
-          <h4 className="text-sm font-medium mb-2">Risk Calculation Formula</h4>
+          <div className="flex items-center gap-2 mb-2">
+            <h4 className="text-sm font-medium">Risk Calculation Formula</h4>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-sm">
+                  <p>This formula calculates the risk score based on file access patterns, login activity, and network behavior.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <p className="text-xs text-muted-foreground">
             Risk_Score = 38.36454020555577*s1[-0.03249382] + s2[0.05180103] + s3[0.18216909]
           </p>

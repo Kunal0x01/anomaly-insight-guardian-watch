@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -7,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { 
   FileText, Download, Clock, Calendar, BarChart2, Users, Shield, 
-  FileBarChart, AlertTriangle, CheckCircle2, Printer, ExternalLink, ChevronDown
+  FileBarChart, AlertTriangle, CheckCircle2, Printer, ExternalLink, ChevronDown,
+  LineChart, Gauge, MailOpen
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fetchLogs, getLogServerUrl, calculateRiskScore, calculateFileAccessRiskScore, calculateLogonRiskScore, calculateNetworkRiskScore } from "@/services/logService";
@@ -24,6 +24,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast as sonnerToast } from "sonner";
+import EmailReportForm from "@/components/reports/EmailReportForm";
 
 const ReportsPage = () => {
   const { toast } = useToast();
@@ -175,6 +177,9 @@ const ReportsPage = () => {
   const handleGenerateReport = async () => {
     setIsGeneratingReport(true);
     
+    // Notify user that report generation has started
+    sonnerToast.loading("Generating your report...");
+    
     setTimeout(async () => {
       try {
         if (!reportRef.current) {
@@ -214,12 +219,15 @@ const ReportsPage = () => {
         // Save the PDF
         pdf.save(`Security_Log_Analysis_Report_${new Date().toISOString().split('T')[0]}.pdf`);
         
+        // Close the loading toast and show success
+        sonnerToast.dismiss();
         toast({
           title: "Report Generated Successfully",
           description: "Your security log analysis report has been generated and downloaded.",
         });
       } catch (error) {
         console.error("Error generating report:", error);
+        sonnerToast.dismiss();
         toast({
           title: "Report Generation Failed",
           description: "There was a problem generating your report. Please try again.",
@@ -228,7 +236,7 @@ const ReportsPage = () => {
       } finally {
         setIsGeneratingReport(false);
       }
-    }, 500);
+    }, 1000);
   };
 
   const riskStats = calculateRiskStats();
@@ -279,9 +287,10 @@ const ReportsPage = () => {
                 <Button variant="outline" size="sm">
                   <Printer className="mr-2 h-4 w-4" /> Print
                 </Button>
-                <Button variant="outline" size="sm">
-                  <ExternalLink className="mr-2 h-4 w-4" /> Share
-                </Button>
+                <EmailReportForm 
+                  reportTitle="Security Log Analysis" 
+                  reportType={reportType.charAt(0).toUpperCase() + reportType.slice(1)}
+                />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -301,529 +310,384 @@ const ReportsPage = () => {
                 className="border border-border rounded-lg p-6 bg-background space-y-6" 
                 ref={reportRef}
               >
-                {/* Report Header */}
-                <div className="space-y-2 border-b border-border pb-4">
-                  <h1 className="text-2xl font-bold">Security Log Analysis Report</h1>
-                  <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      <span>Generated on: {new Date().toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: '2-digit', 
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                      })}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FileBarChart className="h-4 w-4" />
-                      <span>Report Type: {reportType.charAt(0).toUpperCase() + reportType.slice(1)} Summary</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4" />
-                      <span>Log server: {getLogServerUrl()}</span>
-                    </div>
-                    <p className="mt-2">
-                      This report contains comprehensive analysis of security logs, 
-                      highlighting potential security threats, anomalies, and user behavior patterns.
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Executive Summary */}
-                <div className="space-y-2">
-                  <h2 className="text-xl font-semibold">Executive Summary</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                    <Card className="bg-secondary/30">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">Total Monitored Users</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between">
-                          <Users className="h-8 w-8 text-primary" />
-                          <span className="text-2xl font-bold">{riskStats.totalUsers}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-secondary/30">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">Total Anomalies</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between">
-                          <AlertTriangle className="h-8 w-8 text-anomaly-high" />
-                          <span className="text-2xl font-bold">{riskStats.totalAnomalies}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-secondary/30">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">High Risk Users</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between">
-                          <Shield className="h-8 w-8 text-anomaly-medium" />
-                          <span className="text-2xl font-bold">{riskStats.highRisk + riskStats.criticalRisk}</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-secondary/30">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm">Security Score</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between">
-                          <CheckCircle2 className="h-8 w-8 text-anomaly-low" />
-                          <span className="text-2xl font-bold">
-                            {Math.max(0, 100 - (riskStats.totalAnomalies * 5))}%
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-                
-                {/* Risk Distribution */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Risk Distribution</h2>
-                  <div className="grid grid-cols-1 gap-4">
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">User Risk Levels</CardTitle>
-                        <CardDescription>Distribution of users by risk category</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        {/* Risk Distribution Bars */}
-                        <div className="space-y-3">
-                          <div className="space-y-1">
-                            <div className="flex justify-between">
-                              <span className="text-sm font-medium">Critical Risk</span>
-                              <span className="text-sm font-medium text-red-500">{riskStats.criticalRisk}</span>
-                            </div>
-                            <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-red-500 rounded-full" 
-                                style={{ width: `${(riskStats.criticalRisk / riskStats.totalUsers) * 100}%` }} 
-                              />
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-1">
-                            <div className="flex justify-between">
-                              <span className="text-sm font-medium">High Risk</span>
-                              <span className="text-sm font-medium text-anomaly-high">{riskStats.highRisk}</span>
-                            </div>
-                            <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-anomaly-high rounded-full" 
-                                style={{ width: `${(riskStats.highRisk / riskStats.totalUsers) * 100}%` }} 
-                              />
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-1">
-                            <div className="flex justify-between">
-                              <span className="text-sm font-medium">Medium Risk</span>
-                              <span className="text-sm font-medium text-anomaly-medium">{riskStats.mediumRisk}</span>
-                            </div>
-                            <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-anomaly-medium rounded-full" 
-                                style={{ width: `${(riskStats.mediumRisk / riskStats.totalUsers) * 100}%` }} 
-                              />
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-1">
-                            <div className="flex justify-between">
-                              <span className="text-sm font-medium">Low Risk</span>
-                              <span className="text-sm font-medium text-anomaly-low">{riskStats.lowRisk}</span>
-                            </div>
-                            <div className="h-2 w-full bg-secondary/30 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-anomaly-low rounded-full" 
-                                style={{ width: `${(riskStats.lowRisk / riskStats.totalUsers) * 100}%` }} 
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-                
-                {/* Network Activity */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Network Activity</h2>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="h-80">
-                      <NetworkActivityGraph 
-                        data={networkData} 
-                        title="Network Traffic Analysis" 
-                        description="Sent and received bytes with anomaly detection"
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Top Risk Users */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Top Risk Users</h2>
-                  <div className="grid grid-cols-1 gap-4">
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">Highest Risk Users</CardTitle>
-                        <CardDescription>Users with the highest calculated risk scores</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {riskStats.topRiskUsers.map((user, index) => (
-                            <div key={index} className="flex items-center">
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-secondary/50 mr-3">
-                                <Users className="h-4 w-4" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex justify-between items-center">
-                                  <h4 className="font-medium">{user.user}</h4>
-                                  <span className={`text-sm font-bold ${
-                                    user.riskScore > 0.7 ? 'text-anomaly-high' :
-                                    user.riskScore > 0.4 ? 'text-anomaly-medium' : 'text-anomaly-low'
-                                  }`}>{(user.riskScore * 100).toFixed(0)}%</span>
-                                </div>
-                                <Progress 
-                                  className="h-2 mt-1" 
-                                  value={user.riskScore * 100} 
-                                  indicatorClassName={
-                                    user.riskScore > 0.7 ? 'bg-anomaly-high' :
-                                    user.riskScore > 0.4 ? 'bg-anomaly-medium' : 'bg-anomaly-low'
-                                  }
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-                
-                {/* File Access Analysis */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">File Access Analysis</h2>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="h-80">
-                      <AnomalyTrend
-                        title="File Access Activity"
-                        description="Number of files accessed with anomaly detection"
-                        data={fileAccessLogs.map(log => ({
-                          name: `${log.Details.Hostname}`,
-                          value: log.Details["Number of Files Accessed"] || 0,
-                          anomalyScore: log.Details["Number of Files Accessed"] > 20 ? 0.8 : 0.3
-                        }))}
-                        gradientFrom="rgba(16, 185, 129, 0.2)"
-                        gradientTo="rgba(16, 185, 129, 0)"
-                        height={260}
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Login Activity Analysis */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Login Activity Analysis</h2>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="h-80">
-                      <AnomalyTrend
-                        title="Failed Login Attempts"
-                        description="Failed login attempts with anomaly detection"
-                        data={logonActivityLogs
-                          .filter(log => (log.Details["No. of Failed Login Attempts"] || 0) > 0)
-                          .map(log => ({
-                            name: `${log.Details.Hostname}`,
-                            value: log.Details["No. of Failed Login Attempts"] || 0,
-                            anomalyScore: (log.Details["No. of Failed Login Attempts"] || 0) > 3 ? 0.9 : 0.6
-                          }))}
-                        gradientFrom="rgba(239, 68, 68, 0.2)"
-                        gradientTo="rgba(239, 68, 68, 0)"
-                        height={260}
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Risk Calculation Methodology */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Risk Calculation Methodology</h2>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">Risk Score Formula</CardTitle>
-                      <CardDescription>How risk scores are calculated for users and activities</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="p-4 bg-secondary/20 rounded-md border border-border/30">
-                        <h4 className="font-medium mb-2">Risk Score Formula</h4>
-                        <p className="text-sm">
-                          Risk_Score = 38.36454020555577*s1[-0.03249382] + s2[0.05180103] + s3[0.18216909]
+                {/* Report Header with attractive styling */}
+                <div className="relative rounded-lg bg-gradient-to-r from-purple-900/80 to-indigo-900/80 p-6 mb-8">
+                  <div className="absolute inset-0 bg-grid-white/10 opacity-10"></div>
+                  <div className="relative">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-200 to-cyan-200">
+                          Security Vulnerability Assessment
+                        </h1>
+                        <p className="mt-2 text-gray-300 max-w-3xl">
+                          Comprehensive analysis of system security logs with risk scoring and anomaly detection
                         </p>
-                        <div className="mt-2 space-y-1 text-sm">
-                          <p>Where:</p>
-                          <ul className="list-disc pl-6">
-                            <li>s1 = File Access Score (based on number of files accessed)</li>
-                            <li>s2 = Logon Activity Score (based on failed logins and account lockouts)</li>
-                            <li>s3 = Network Activity Score (based on data transfer volumes)</li>
-                          </ul>
+                      </div>
+                      <div className="hidden md:flex items-center justify-center bg-black/30 p-4 rounded-full border border-white/10">
+                        <Shield className="h-12 w-12 text-purple-300" />
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div className="flex items-center gap-2 bg-black/20 p-2 rounded-md">
+                        <Calendar className="h-4 w-4 text-purple-300" />
+                        <div>
+                          <div className="text-gray-400">Generated on</div>
+                          <div className="font-medium text-white">{new Date().toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}</div>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="p-4 bg-secondary/20 rounded-md border border-border/30">
-                          <h4 className="font-medium mb-2">File Access Risk</h4>
-                          <p className="text-sm">
-                            Risk increases as the number of files accessed increases. 
-                            Access to more than 20 files in a short period is flagged as suspicious.
-                          </p>
-                        </div>
-                        
-                        <div className="p-4 bg-secondary/20 rounded-md border border-border/30">
-                          <h4 className="font-medium mb-2">Login Activity Risk</h4>
-                          <p className="text-sm">
-                            Multiple failed login attempts and account lockouts significantly 
-                            increase risk score. Each failed attempt raises the risk level.
-                          </p>
-                        </div>
-                        
-                        <div className="p-4 bg-secondary/20 rounded-md border border-border/30">
-                          <h4 className="font-medium mb-2">Network Activity Risk</h4>
-                          <p className="text-sm">
-                            Large data transfers (over 100KB) are considered high risk, potentially 
-                            indicating data exfiltration attempts or malware communication.
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                {/* Recommendations */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Security Recommendations</h2>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">Suggested Actions</CardTitle>
-                      <CardDescription>Recommended steps to address identified security risks</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5">
-                            <AlertTriangle className="h-5 w-5 text-anomaly-high" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium">Investigate High-Risk Users</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Conduct detailed investigation of users with risk scores above 70%, focusing on 
-                              unusual file access patterns and network activities.
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5">
-                            <Shield className="h-5 w-5 text-anomaly-medium" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium">Review Authentication Policies</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Implement stronger password policies and multi-factor authentication for all users, 
-                              especially those with elevated privileges.
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5">
-                            <FileBarChart className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium">Enhance Network Monitoring</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Set up alerts for large data transfers, especially during non-business hours or from 
-                              unusual locations.
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-3">
-                          <div className="mt-0.5">
-                            <Users className="h-5 w-5 text-primary" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium">User Security Training</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Conduct regular security awareness training for all users with emphasis on recognizing 
-                              phishing attempts and proper handling of sensitive data.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                {/* Footer */}
-                <div className="pt-4 border-t border-border text-center text-sm text-muted-foreground">
-                  <p>Generated by AnomalyGuard Security Platform • {new Date().toLocaleDateString()}</p>
-                  <p className="mt-1">Confidential Security Information</p>
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="recent" className="space-y-4 mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[
-                  { title: "Weekly Anomaly Summary", icon: Shield, date: "April 7, 2025" },
-                  { title: "User Activity Report", icon: Users, date: "April 1, 2025" },
-                  { title: "Compliance Audit", icon: FileText, date: "March 30, 2025" },
-                  { title: "Security Metrics", icon: BarChart2, date: "March 25, 2025" },
-                  { title: "Monthly Executive Summary", icon: FileText, date: "March 1, 2025" },
-                ].map((report, i) => (
-                  <Card key={i}>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start gap-2">
-                        <report.icon className="h-5 w-5 text-primary mt-0.5" />
+                      <div className="flex items-center gap-2 bg-black/20 p-2 rounded-md">
+                        <FileBarChart className="h-4 w-4 text-purple-300" />
                         <div>
-                          <CardTitle className="text-lg">{report.title}</CardTitle>
-                          <CardDescription>Generated on {report.date}</CardDescription>
+                          <div className="text-gray-400">Report Type</div>
+                          <div className="font-medium text-white">{reportType.charAt(0).toUpperCase() + reportType.slice(1)} Security Assessment</div>
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardFooter className="pt-2">
-                      <div className="flex justify-between items-center w-full">
-                        <Button variant="ghost" size="sm">
-                          <Download className="mr-2 h-4 w-4" /> Download
-                        </Button>
-                        <Button variant="outline" size="sm">View</Button>
+                      
+                      <div className="flex items-center gap-2 bg-black/20 p-2 rounded-md">
+                        <Shield className="h-4 w-4 text-purple-300" />
+                        <div>
+                          <div className="text-gray-400">Log Server</div>
+                          <div className="font-medium text-white">{getLogServerUrl()}</div>
+                        </div>
                       </div>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="scheduled" className="space-y-4 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-primary" />
-                    Scheduled Reports
-                  </CardTitle>
-                  <CardDescription>Configure your automatic report generation schedule</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 border rounded-md">
-                      <div>
-                        <p className="font-medium">Weekly Security Summary</p>
-                        <p className="text-sm text-muted-foreground">Every Monday at 8:00 AM</p>
-                      </div>
-                      <Button variant="outline" size="sm">Edit</Button>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 border rounded-md">
-                      <div>
-                        <p className="font-medium">Executive Dashboard</p>
-                        <p className="text-sm text-muted-foreground">1st day of each month</p>
-                      </div>
-                      <Button variant="outline" size="sm">Edit</Button>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 border rounded-md">
-                      <div>
-                        <p className="font-medium">Daily Alert Digest</p>
-                        <p className="text-sm text-muted-foreground">Daily at 5:00 PM</p>
-                      </div>
-                      <Button variant="outline" size="sm">Edit</Button>
                     </div>
                   </div>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline">
-                    <Calendar className="mr-2 h-4 w-4" /> Schedule New Report
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="templates" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Available Templates</CardTitle>
-                    <CardDescription>Use these pre-configured report templates</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="flex items-center justify-between p-2 hover:bg-muted rounded-md">
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-primary" />
-                        <span>Security Incidents Summary</span>
-                      </div>
-                      <Button variant="ghost" size="sm">Use</Button>
-                    </div>
-                    <div className="flex items-center justify-between p-2 hover:bg-muted rounded-md">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-primary" />
-                        <span>User Behavior Analysis</span>
-                      </div>
-                      <Button variant="ghost" size="sm">Use</Button>
-                    </div>
-                    <div className="flex items-center justify-between p-2 hover:bg-muted rounded-md">
-                      <div className="flex items-center gap-2">
-                        <BarChart2 className="h-4 w-4 text-primary" />
-                        <span>Compliance Audit Report</span>
-                      </div>
-                      <Button variant="ghost" size="sm">Use</Button>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline">Create Custom Template</Button>
-                  </CardFooter>
-                </Card>
+                </div>
                 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Export Options</CardTitle>
-                    <CardDescription>Configure how reports are generated and shared</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <p className="font-medium mb-2">Format</p>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">PDF</Button>
-                        <Button variant="outline" size="sm">Excel</Button>
-                        <Button variant="outline" size="sm">CSV</Button>
+                {/* Executive Summary with improved visual styling */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/20 p-1.5 rounded-md">
+                      <BarChart2 className="h-5 w-5 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-semibold">Executive Summary</h2>
+                  </div>
+                  
+                  <div className="p-4 rounded-lg border border-border/50 bg-card/50">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      This report provides a comprehensive analysis of security logs collected from the system,
+                      highlighting potential security threats, unusual user behavior, and anomalous activities. 
+                      The assessment is based on analysis of file access patterns, login activities, and network traffic.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                      <Card className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 border-purple-700/30">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm">Monitored Users</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between">
+                            <Users className="h-8 w-8 text-purple-400" />
+                            <div className="text-right">
+                              <span className="text-2xl font-bold">{riskStats.totalUsers}</span>
+                              <div className="text-xs text-muted-foreground">Active entities</div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-gradient-to-br from-red-900/30 to-red-800/20 border-red-700/30">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm">Detected Anomalies</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between">
+                            <AlertTriangle className="h-8 w-8 text-red-400" />
+                            <div className="text-right">
+                              <span className="text-2xl font-bold">{riskStats.totalAnomalies}</span>
+                              <div className="text-xs text-muted-foreground">Unusual activities</div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-gradient-to-br from-amber-900/30 to-amber-800/20 border-amber-700/30">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm">High Risk Users</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between">
+                            <Shield className="h-8 w-8 text-amber-400" />
+                            <div className="text-right">
+                              <span className="text-2xl font-bold">{riskStats.highRisk + riskStats.criticalRisk}</span>
+                              <div className="text-xs text-muted-foreground">Need investigation</div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-gradient-to-br from-green-900/30 to-green-800/20 border-green-700/30">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm">Security Score</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex items-center justify-between">
+                            <Gauge className="h-8 w-8 text-green-400" />
+                            <div className="text-right">
+                              <span className="text-2xl font-bold">
+                                {Math.max(0, 100 - (riskStats.totalAnomalies * 5))}%
+                              </span>
+                              <div className="text-xs text-muted-foreground">System health</div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Key Findings Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/20 p-1.5 rounded-md">
+                      <AlertTriangle className="h-5 w-5 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-semibold">Key Findings</h2>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Vulnerability Summary */}
+                    <Card>
+                      <CardHeader className="pb-2 border-b border-border/50">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          Critical Vulnerabilities
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-4 space-y-4">
+                        {riskStats.totalAnomalies > 0 ? (
+                          <div className="space-y-3">
+                            {riskStats.loginAnomalies > 0 && (
+                              <div className="p-3 rounded-md bg-red-900/20 border border-red-900/30">
+                                <div className="font-medium text-red-400 mb-1">Authentication Anomalies</div>
+                                <p className="text-sm text-muted-foreground">
+                                  {riskStats.loginAnomalies} instances of failed login attempts or account lockouts detected.
+                                  This may indicate brute force attacks or credential theft attempts.
+                                </p>
+                              </div>
+                            )}
+                            {riskStats.networkAnomalies > 0 && (
+                              <div className="p-3 rounded-md bg-amber-900/20 border border-amber-900/30">
+                                <div className="font-medium text-amber-400 mb-1">Data Exfiltration Risk</div>
+                                <p className="text-sm text-muted-foreground">
+                                  {riskStats.networkAnomalies} instances of unusually large data transfers detected.
+                                  This may indicate unauthorized data access or exfiltration.
+                                </p>
+                              </div>
+                            )}
+                            {riskStats.fileAnomalies > 0 && (
+                              <div className="p-3 rounded-md bg-purple-900/20 border border-purple-900/30">
+                                <div className="font-medium text-purple-400 mb-1">Suspicious File Access</div>
+                                <p className="text-sm text-muted-foreground">
+                                  {riskStats.fileAnomalies} instances of unusual file access patterns detected.
+                                  Users accessing a large number of files in short periods may indicate unauthorized activity.
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center py-6 text-center">
+                            <CheckCircle2 className="h-12 w-12 text-green-500 mb-2" />
+                            <p className="text-muted-foreground">No critical vulnerabilities detected in this assessment period</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Risk Distribution */}
+                    <Card>
+                      <CardHeader className="pb-2 border-b border-border/50">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Shield className="h-4 w-4 text-primary" />
+                          Risk Distribution
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-4">
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-sm font-medium flex items-center gap-1">
+                                <span className="inline-block w-3 h-3 rounded-full bg-red-500"></span>
+                                Critical Risk
+                              </span>
+                              <span className="text-sm font-medium text-red-500">{riskStats.criticalRisk}</span>
+                            </div>
+                            <div className="h-2.5 w-full bg-secondary/30 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full" 
+                                style={{ width: `${(riskStats.criticalRisk / Math.max(riskStats.totalUsers, 1)) * 100}%` }} 
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Immediate attention required - severe security threats
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-sm font-medium flex items-center gap-1">
+                                <span className="inline-block w-3 h-3 rounded-full bg-orange-500"></span>
+                                High Risk
+                              </span>
+                              <span className="text-sm font-medium text-orange-500">{riskStats.highRisk}</span>
+                            </div>
+                            <div className="h-2.5 w-full bg-secondary/30 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-orange-600 to-orange-400 rounded-full" 
+                                style={{ width: `${(riskStats.highRisk / Math.max(riskStats.totalUsers, 1)) * 100}%` }} 
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Significant security risks requiring prompt investigation
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-sm font-medium flex items-center gap-1">
+                                <span className="inline-block w-3 h-3 rounded-full bg-amber-500"></span>
+                                Medium Risk
+                              </span>
+                              <span className="text-sm font-medium text-amber-500">{riskStats.mediumRisk}</span>
+                            </div>
+                            <div className="h-2.5 w-full bg-secondary/30 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-amber-600 to-amber-400 rounded-full" 
+                                style={{ width: `${(riskStats.mediumRisk / Math.max(riskStats.totalUsers, 1)) * 100}%` }} 
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Notable security concerns requiring monitoring
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-sm font-medium flex items-center gap-1">
+                                <span className="inline-block w-3 h-3 rounded-full bg-green-500"></span>
+                                Low Risk
+                              </span>
+                              <span className="text-sm font-medium text-green-500">{riskStats.lowRisk}</span>
+                            </div>
+                            <div className="h-2.5 w-full bg-secondary/30 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-green-600 to-green-400 rounded-full" 
+                                style={{ width: `${(riskStats.lowRisk / Math.max(riskStats.totalUsers, 1)) * 100}%` }} 
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Minimal security concerns under normal operation
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+                
+                {/* Network Activity Section with Visualization */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/20 p-1.5 rounded-md">
+                      <LineChart className="h-5 w-5 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-semibold">Network Activity Analysis</h2>
+                  </div>
+                  
+                  <div className="p-4 rounded-lg border border-border/50 bg-card/50">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Network traffic analysis reveals patterns of data transmission, potential data exfiltration, 
+                      and anomalous communications. The graph below highlights unusual network activity that may 
+                      indicate security threats.
+                    </p>
+                    
+                    <div className="mt-4 h-80 border border-border/40 rounded-lg p-2">
+                      <NetworkActivityGraph 
+                        data={networkData} 
+                        title="Network Traffic Analysis" 
+                        description="Data transfer volumes with anomaly detection"
+                      />
+                    </div>
+                    
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-3 rounded-md bg-slate-900/50 border border-border/40">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertTriangle className="h-4 w-4 text-amber-500" />
+                          <h4 className="font-medium">Anomalous Traffic</h4>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {riskStats.networkAnomalies} instances of high-volume data transfers detected that exceed 
+                          normal baseline patterns. These may indicate lateral movement or exfiltration attempts.
+                        </p>
+                      </div>
+                      
+                      <div className="p-3 rounded-md bg-slate-900/50 border border-border/40">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Users className="h-4 w-4 text-primary" />
+                          <h4 className="font-medium">User Analysis</h4>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {riskStats.topRiskUsers.filter(u => u.riskScore > 0.6).length} users showing unusual network 
+                          patterns. The highest volume transfer was observed from 
+                          user "{riskStats.topRiskUsers[0]?.user || 'N/A'}".
+                        </p>
+                      </div>
+                      
+                      <div className="p-3 rounded-md bg-slate-900/50 border border-border/40">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Shield className="h-4 w-4 text-green-500" />
+                          <h4 className="font-medium">Recommendations</h4>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Implement network traffic monitoring with volume thresholds and investigate all transfers 
+                          exceeding 100KB, especially from administrative or privileged accounts.
+                        </p>
                       </div>
                     </div>
-                    <div>
-                      <p className="font-medium mb-2">Delivery</p>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">Email</Button>
-                        <Button variant="outline" size="sm">Dashboard</Button>
-                        <Button variant="outline" size="sm">API</Button>
-                      </div>
+                  </div>
+                </div>
+                
+                {/* High Risk Users Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/20 p-1.5 rounded-md">
+                      <Users className="h-5 w-5 text-primary" />
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </DashboardLayout>
-    </>
-  );
-};
-
-export default ReportsPage;
+                    <h2 className="text-xl font-semibold">High Risk Users</h2>
+                  </div>
+                  
+                  <Card className="border-red-900/30">
+                    <CardHeader className="pb-2 bg-gradient-to-r from-red-900/30 to-orange-900/20 border-b border-red-900/20">
+                      <CardTitle className="text-base">Users Requiring Immediate Investigation</CardTitle>
+                      <CardDescription>Ranked by calculated risk score based on combined activity metrics</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <div className="space-y-5">
+                        {riskStats.topRiskUsers.slice(0, 5).map((user, index) => (
+                          <div key={index} className="space-y-2">
+                            <div className="flex items-center">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3
+                                ${user.riskScore > 0.8 ? 'bg-red-900/40 text-red-400' : 
+                                user.riskScore > 0.6 ? 'bg-orange-900/40 text-orange-400' :
+                                user.riskScore > 0.4 ? 'bg-amber-900/40 text-amber-400' :
+                                'bg-green-900/40 text-green-400'}`}
+                              >
+                                <span className="text-sm font-bold">{index + 1}</span>
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <h4 className="font-medium">{user.user}</h4>
+                                    <div className="flex gap-2 text-xs text-muted-foreground">
+                                      <span className={`px-1.5 py-0.5 rounded-full ${
+                                        user.riskScore > 0.8 ? 'bg-red-900/30 text-red-400' : 
+                                        user.riskScore > 0.6 ? 'bg-orange-900/30 text-orange-400' :
+                                        user.riskScore > 0.4 ? 'bg-amber-900/30 text-
