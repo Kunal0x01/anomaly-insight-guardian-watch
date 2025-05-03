@@ -57,7 +57,7 @@ const FileAccessVisualization: React.FC<FileAccessVisualizationProps> = ({ logs,
 
   return (
     <Card className={cn("cyber-border backdrop-blur-sm scanning-effect", className)}>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5" />
           File Access Analysis
@@ -68,13 +68,13 @@ const FileAccessVisualization: React.FC<FileAccessVisualizationProps> = ({ logs,
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="chart">
-          <TabsList className="mb-4">
+          <TabsList className="mb-2">
             <TabsTrigger value="chart">Chart View</TabsTrigger>
             <TabsTrigger value="table">Table View</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="chart" className="space-y-4">
-            <div className="h-72">
+          <TabsContent value="chart">
+            <div className="h-32 sm:h-40 md:h-48">
               <ChartContainer
                 config={{
                   fileAccess: { label: "Files Accessed" },
@@ -83,19 +83,19 @@ const FileAccessVisualization: React.FC<FileAccessVisualizationProps> = ({ logs,
                 <BarChart
                   data={chartData}
                   layout="vertical"
-                  margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+                  margin={{ top: 5, right: 20, left: 70, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis 
                     type="number" 
-                    tick={{ fill: 'rgba(255,255,255,0.6)' }} 
+                    tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 10 }} 
                     stroke="rgba(255,255,255,0.1)"
                   />
                   <YAxis 
                     type="category" 
                     dataKey="hostname" 
-                    width={70}
-                    tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 12 }} 
+                    width={65}
+                    tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 10 }} 
                     stroke="rgba(255,255,255,0.1)"
                   />
                   <Tooltip
@@ -108,7 +108,7 @@ const FileAccessVisualization: React.FC<FileAccessVisualizationProps> = ({ logs,
                   <Bar 
                     dataKey="totalFiles" 
                     radius={[0, 4, 4, 0]}
-                    barSize={20}
+                    barSize={16}
                   >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -120,7 +120,7 @@ const FileAccessVisualization: React.FC<FileAccessVisualizationProps> = ({ logs,
           </TabsContent>
           
           <TabsContent value="table">
-            <div className="border border-border/30 rounded-md overflow-hidden">
+            <div className="border border-border/30 rounded-md overflow-hidden max-h-48 overflow-y-auto">
               <UITable>
                 <TableHeader className="bg-secondary/50 backdrop-blur-sm">
                   <TableRow>

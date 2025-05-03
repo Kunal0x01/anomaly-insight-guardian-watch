@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { BarChart2, FileText, Shield, ShieldAlert, User, Users } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -319,19 +318,19 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Fetched Log Data Visualizations */}
+      {/* Fetched Log Data Visualizations - UPDATED: Two visualizations per row */}
       {(hasFileAccess || hasLogonActivity || hasNetworkActivity) && (
-        <div className="space-y-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {hasFileAccess && fileAccessLogs.length > 0 && (
-            <FileAccessVisualization logs={fileAccessLogs} />
+            <FileAccessVisualization logs={fileAccessLogs} className="h-[250px]" />
           )}
           
           {hasLogonActivity && logonActivityLogs.length > 0 && (
-            <LogonActivityVisualization logs={logonActivityLogs} />
+            <LogonActivityVisualization logs={logonActivityLogs} className="h-[250px]" />
           )}
           
           {hasNetworkActivity && networkActivityLogs.length > 0 && (
-            <NetworkActivityVisualization logs={networkActivityLogs} />
+            <NetworkActivityVisualization logs={networkActivityLogs} className="h-[250px]" />
           )}
         </div>
       )}

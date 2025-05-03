@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveContainer } from 'recharts';
 import { LogIn, Table } from 'lucide-react';
 import { LogonActivityLog } from '@/services/mockData';
 import { cn } from '@/lib/utils';
@@ -15,7 +15,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 
 interface LogonActivityVisualizationProps {
   logs: LogonActivityLog[];
@@ -26,185 +25,131 @@ const LogonActivityVisualization: React.FC<LogonActivityVisualizationProps> = ({
   if (!logs.length) return null;
   
   // Process data for visualization
-  const hostData = logs.map(log => {
-    const details = log.Details;
-    return {
-      hostname: details.Hostname,
-      date: details.Date,
-      logins: details["No. of Logins"] || 0,
-      logouts: details["No. of Logouts"] || 0,
-      failedLogins: details["No. of Failed Login Attempts"] || 0,
-      accountLockouts: details["No. of Account Lockout Attempts"] || 0,
-      risk: log.RiskLevel || 'Low'
-    };
-  });
-  
-  // Aggregate by hostname
-  const aggregatedData = hostData.reduce<Record<string, {
-    logins: number, 
-    logouts: number, 
-    failedLogins: number, 
-    accountLockouts: number,
-    risk: string
-  }>>((acc, log) => {
-    if (!acc[log.hostname]) {
-      acc[log.hostname] = {
-        logins: 0,
-        logouts: 0,
-        failedLogins: 0,
-        accountLockouts: 0,
-        risk: log.risk
-      };
-    }
+  const hostToLogins = logs.reduce<Record<string, {logins: number, failed: number}>>((acc, log) => {
+    const hostname = log.Details.Hostname;
+    if (!acc[hostname]) acc[hostname] = {logins: 0, failed: 0};
     
-    acc[log.hostname].logins += log.logins;
-    acc[log.hostname].logouts += log.logouts;
-    acc[log.hostname].failedLogins += log.failedLogins;
-    acc[log.hostname].accountLockouts += log.accountLockouts;
-    
-    // Keep the highest risk level
-    const riskOrder = { 'Low': 1, 'Medium': 2, 'High': 3, 'Critical': 4 };
-    const currentRiskLevel = riskOrder[log.risk as keyof typeof riskOrder] || 1;
-    const existingRiskLevel = riskOrder[acc[log.hostname].risk as keyof typeof riskOrder] || 1;
-    
-    if (currentRiskLevel > existingRiskLevel) {
-      acc[log.hostname].risk = log.risk;
-    }
+    acc[hostname].logins += log.Details["No. of Logins"] || 0;
+    acc[hostname].failed += log.Details["No. of Failed Login Attempts"] || 0;
     
     return acc;
   }, {});
   
-  // Transform for chart data
-  const chartData = Object.entries(aggregatedData).map(([hostname, data]) => ({
-    hostname,
-    ...data,
-    anomalyScore: (data.failedLogins * 0.6 + data.accountLockouts * 0.4) / (data.logins || 1)
-  })).sort((a, b) => b.anomalyScore - a.anomalyScore);
+  // Transform into chart data
+  const chartData = Object.entries(hostToLogins).map(([hostname, stats]) => {
+    return {
+      hostname,
+      logins: stats.logins,
+      failed: stats.failed,
+      // Color based on failed login ratio
+      color: stats.failed > 5 ? "var(--anomaly-high)" : 
+             stats.failed > 2 ? "var(--anomaly-medium)" : 
+             "var(--anomaly-low)"
+    };
+  }).sort((a, b) => (b.logins + b.failed) - (a.logins + a.failed));
   
-  const dayMapper = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  const periodMapper = ["", "Morning (00:00-06:00)", "Day (06:00-12:00)", "Afternoon (12:00-18:00)", "Night (18:00-24:00)"];
-
-  const getRiskBadgeClass = (risk: string) => {
-    switch (risk) {
-      case 'Critical':
-      case 'High': 
-        return "bg-anomaly-high/10 text-anomaly-high border-anomaly-high/40";
-      case 'Medium':
-        return "bg-anomaly-medium/10 text-anomaly-medium border-anomaly-medium/40";
-      default:
-        return "bg-anomaly-low/10 text-anomaly-low border-anomaly-low/40";
-    }
-  };
-
   return (
     <Card className={cn("cyber-border backdrop-blur-sm scanning-effect", className)}>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2">
           <LogIn className="h-5 w-5" />
           Logon Activity Analysis
         </CardTitle>
         <CardDescription>
-          {logs.length} logon activity events analyzed by host and time
+          {logs.length} logon activity events analyzed by host
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="chart">
-          <TabsList className="mb-4">
+          <TabsList className="mb-2">
             <TabsTrigger value="chart">Chart View</TabsTrigger>
             <TabsTrigger value="table">Table View</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="chart" className="space-y-4">
-            <div className="h-72">
+          <TabsContent value="chart">
+            <div className="h-32 sm:h-40 md:h-48">
               <ChartContainer
                 config={{
-                  logins: { label: "Logins" },
-                  logouts: { label: "Logouts" },
-                  failedLogins: { label: "Failed Logins" },
-                  accountLockouts: { label: "Account Lockouts" }
+                  logins: { label: "Successful Logins" },
+                  failed: { label: "Failed Logins" }
                 }}
               >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={chartData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 25 }}
+                <BarChart
+                  data={chartData}
+                  layout="vertical"
+                  margin={{ top: 5, right: 20, left: 70, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                  <XAxis 
+                    type="number" 
+                    tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 10 }} 
+                    stroke="rgba(255,255,255,0.1)"
+                  />
+                  <YAxis 
+                    type="category" 
+                    dataKey="hostname" 
+                    width={65}
+                    tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 10 }} 
+                    stroke="rgba(255,255,255,0.1)"
+                  />
+                  <Tooltip
+                    formatter={(value: number, name: string) => [
+                      `${value}`, 
+                      name === "logins" ? "Successful Logins" : "Failed Logins"
+                    ]}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--background))',
+                      borderColor: 'hsl(var(--border))',
+                    }}
+                  />
+                  <Bar 
+                    dataKey="logins" 
+                    stackId="a"
+                    fill="var(--anomaly-low)"
+                    radius={[0, 0, 0, 0]}
+                    barSize={16}
+                  />
+                  <Bar 
+                    dataKey="failed" 
+                    stackId="a" 
+                    radius={[0, 4, 4, 0]}
+                    barSize={16}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                    <XAxis 
-                      dataKey="hostname" 
-                      tick={{ fill: 'rgba(255,255,255,0.6)', fontSize: 12 }} 
-                      stroke="rgba(255,255,255,0.1)"
-                    />
-                    <YAxis 
-                      tick={{ fill: 'rgba(255,255,255,0.6)' }} 
-                      stroke="rgba(255,255,255,0.1)"
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--background))',
-                        borderColor: 'hsl(var(--border))',
-                      }}
-                    />
-                    <Legend />
-                    <Bar dataKey="logins" fill="#10b981" />
-                    <Bar dataKey="logouts" fill="#6366f1" />
-                    <Bar dataKey="failedLogins" fill="#f97316" />
-                    <Bar dataKey="accountLockouts" fill="#ef4444" />
-                  </BarChart>
-                </ResponsiveContainer>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ChartContainer>
             </div>
           </TabsContent>
           
           <TabsContent value="table">
-            <div className="border border-border/30 rounded-md overflow-auto max-h-[400px]">
+            <div className="border border-border/30 rounded-md overflow-hidden max-h-48 overflow-y-auto">
               <UITable>
-                <TableHeader className="bg-secondary/50 backdrop-blur-sm sticky top-0">
+                <TableHeader className="bg-secondary/50 backdrop-blur-sm">
                   <TableRow>
                     <TableHead className="text-xs font-medium">Hostname</TableHead>
-                    <TableHead className="text-xs font-medium">Date</TableHead>
-                    <TableHead className="text-xs font-medium">Day/Time</TableHead>
-                    <TableHead className="text-xs font-medium text-right">Logins</TableHead>
-                    <TableHead className="text-xs font-medium text-right">Logouts</TableHead>
-                    <TableHead className="text-xs font-medium text-right">Failed Attempts</TableHead>
-                    <TableHead className="text-xs font-medium text-right">Lockouts</TableHead>
-                    <TableHead className="text-xs font-medium text-right">Risk Level</TableHead>
+                    <TableHead className="text-xs font-medium text-right">Successful Logins</TableHead>
+                    <TableHead className="text-xs font-medium text-right">Failed Logins</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {logs.map((log, idx) => {
-                    const details = log.Details;
-                    return (
-                      <TableRow key={idx} className={(details["No. of Failed Login Attempts"] > 0 || details["No. of Account Lockout Attempts"] > 0) ? "bg-destructive/10" : ""}>
-                        <TableCell className="text-xs font-medium">{details.Hostname}</TableCell>
-                        <TableCell className="text-xs">{details.Date || "N/A"}</TableCell>
-                        <TableCell className="text-xs">
-                          {dayMapper[details.Day] || "Unknown"} / {periodMapper[details["Time Period"]] || "Unknown"}
-                        </TableCell>
-                        <TableCell className="text-xs text-right">{details["No. of Logins"] || 0}</TableCell>
-                        <TableCell className="text-xs text-right">{details["No. of Logouts"] || 0}</TableCell>
-                        <TableCell className="text-xs text-right">
-                          {details["No. of Failed Login Attempts"] > 0 ? (
-                            <span className="text-anomaly-high font-medium">{details["No. of Failed Login Attempts"]}</span>
-                          ) : (
-                            details["No. of Failed Login Attempts"] || 0
-                          )}
-                        </TableCell>
-                        <TableCell className="text-xs text-right">
-                          {details["No. of Account Lockout Attempts"] > 0 ? (
-                            <span className="text-anomaly-high font-medium">{details["No. of Account Lockout Attempts"]}</span>
-                          ) : (
-                            details["No. of Account Lockout Attempts"] || 0
-                          )}
-                        </TableCell>
-                        <TableCell className="text-xs text-right">
-                          <Badge variant="outline" className={getRiskBadgeClass(log.RiskLevel || 'Low')}>
-                            {log.RiskLevel || 'Low'}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {chartData.map((item, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell className="text-xs font-medium">{item.hostname}</TableCell>
+                      <TableCell className="text-xs text-right">{item.logins}</TableCell>
+                      <TableCell className="text-xs text-right font-mono">
+                        <span className={
+                          item.failed > 5 ? "text-anomaly-high" : 
+                          item.failed > 2 ? "text-anomaly-medium" : 
+                          "text-anomaly-low"
+                        }>
+                          {item.failed}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </UITable>
             </div>
