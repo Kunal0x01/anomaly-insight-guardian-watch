@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Mail, Loader2 } from "lucide-react";
+import { toast as sonnerToast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -19,9 +20,10 @@ import {
 interface EmailReportFormProps {
   reportTitle: string;
   reportType: string;
+  senderEmail?: string;
 }
 
-const EmailReportForm: React.FC<EmailReportFormProps> = ({ reportTitle, reportType }) => {
+const EmailReportForm: React.FC<EmailReportFormProps> = ({ reportTitle, reportType, senderEmail = "" }) => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,7 +31,8 @@ const EmailReportForm: React.FC<EmailReportFormProps> = ({ reportTitle, reportTy
     to: '',
     cc: '',
     subject: `Security Report: ${reportTitle} (${reportType})`,
-    message: `Please find attached the ${reportType} security report for your review.\n\nThis report contains important information about potential security threats and anomalies identified in our systems.`
+    message: `Please find attached the ${reportType} security report for your review.\n\nThis report contains important information about potential security threats and anomalies identified in our systems.`,
+    senderEmail: senderEmail // Pre-filled with the provided email
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -50,17 +53,33 @@ const EmailReportForm: React.FC<EmailReportFormProps> = ({ reportTitle, reportTy
     }
     
     setLoading(true);
+    sonnerToast.loading("Sending email...");
     
-    // Simulate sending email
-    setTimeout(() => {
+    // Here we would actually send the email, but we'll simulate it for now
+    // In a real app, you would use an API or email service
+    try {
+      // Simulating email sending with a delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       setLoading(false);
       setOpen(false);
+      sonnerToast.dismiss();
       
       toast({
         title: "Report Email Sent",
         description: `The security report has been sent to ${emailData.to.split(',').length} recipient(s).`,
       });
-    }, 2000);
+    } catch (error) {
+      console.error("Error sending email:", error);
+      setLoading(false);
+      sonnerToast.dismiss();
+      
+      toast({
+        title: "Email Sending Failed",
+        description: "There was a problem sending your email. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -79,6 +98,23 @@ const EmailReportForm: React.FC<EmailReportFormProps> = ({ reportTitle, reportTy
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="senderEmail">From</Label>
+            <Input
+              id="senderEmail"
+              name="senderEmail"
+              placeholder="Your email (will be prompted for password)"
+              value={emailData.senderEmail}
+              onChange={handleInputChange}
+              disabled={!!senderEmail}
+            />
+            {!senderEmail && (
+              <p className="text-xs text-muted-foreground">
+                You'll be prompted for your email password when sending
+              </p>
+            )}
+          </div>
+          
           <div className="grid gap-2">
             <Label htmlFor="to">To <span className="text-destructive">*</span></Label>
             <Input

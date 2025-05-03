@@ -16,6 +16,7 @@ import { Filter, Search, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fetchLogs, calculateRiskScore } from "@/services/logService";
 import { toast } from "sonner";
+import UserInvestigationModal from "@/components/reports/UserInvestigationModal";
 
 interface UserData {
   id: string;
@@ -32,6 +33,17 @@ const UsersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<{user: string, riskScore: number} | null>(null);
+  const [investigationModalOpen, setInvestigationModalOpen] = useState(false);
+  const [logData, setLogData] = useState<{
+    fileAccessLogs: any[],
+    logonActivityLogs: any[],
+    networkActivityLogs: any[]
+  }>({
+    fileAccessLogs: [],
+    logonActivityLogs: [],
+    networkActivityLogs: []
+  });
 
   useEffect(() => {
     const loadRealUsers = async () => {
@@ -39,6 +51,7 @@ const UsersPage = () => {
       try {
         // Fetch logs from the log service
         const logs = await fetchLogs();
+        setLogData(logs); // Store full logs for investigation
         
         // Extract unique users from logs and create a map to store their data
         const userMap = new Map<string, {
@@ -233,6 +246,14 @@ const UsersPage = () => {
       : "bg-gray-500/10 text-gray-400 border-gray-500/40";
   };
 
+  const handleInvestigateUser = (user: UserData) => {
+    setSelectedUser({
+      user: user.name,
+      riskScore: user.riskScore
+    });
+    setInvestigationModalOpen(true);
+  };
+
   const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -353,8 +374,12 @@ const UsersPage = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="sm">
-                        View Profile
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleInvestigateUser(user)}
+                      >
+                        Investigate
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -375,6 +400,15 @@ const UsersPage = () => {
           </Table>
         </div>
       )}
+
+      <UserInvestigationModal 
+        open={investigationModalOpen}
+        onOpenChange={setInvestigationModalOpen}
+        userData={selectedUser}
+        networkActivityLogs={logData.networkActivityLogs}
+        fileAccessLogs={logData.fileAccessLogs}
+        logonActivityLogs={logData.logonActivityLogs}
+      />
     </DashboardLayout>
   );
 };

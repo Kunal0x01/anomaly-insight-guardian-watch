@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { 
   FileText, Download, Clock, Calendar, BarChart2, Users, Shield, 
   FileBarChart, AlertTriangle, CheckCircle2, Printer, ExternalLink, ChevronDown,
-  LineChart, Gauge, MailOpen
+  LineChart, Gauge, MailOpen, User, ArrowRight, Eye
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fetchLogs, getLogServerUrl, calculateRiskScore, calculateFileAccessRiskScore, calculateLogonRiskScore, calculateNetworkRiskScore } from "@/services/logService";
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast as sonnerToast } from "sonner";
 import EmailReportForm from "@/components/reports/EmailReportForm";
+import UserInvestigationModal from "@/components/reports/UserInvestigationModal";
 
 const ReportsPage = () => {
   const { toast } = useToast();
@@ -36,6 +37,8 @@ const ReportsPage = () => {
   const [logonActivityLogs, setLogonActivityLogs] = useState<LogonActivityLog[]>([]);
   const [networkActivityLogs, setNetworkActivityLogs] = useState<NetworkActivityLog[]>([]);
   const reportRef = useRef<HTMLDivElement>(null);
+  const [selectedUser, setSelectedUser] = useState<{user: string, riskScore: number} | null>(null);
+  const [investigationModalOpen, setInvestigationModalOpen] = useState(false);
   
   const fetchLogData = async () => {
     try {
@@ -141,7 +144,15 @@ const ReportsPage = () => {
         scores.network
       );
       
-      return { user, riskScore: totalRiskScore };
+      return { 
+        user, 
+        riskScore: totalRiskScore,
+        scores: {
+          fileAccess: scores.fileAccess,
+          logon: scores.logon,
+          network: scores.network
+        }
+      };
     }).sort((a, b) => b.riskScore - a.riskScore);
     
     // Count users by risk level
@@ -161,18 +172,71 @@ const ReportsPage = () => {
       (log.Details.rcvdbyte || 0) > 100000
     ).length;
     
+    // Get detailed anomaly information
+    const fileAnomalyDetails = fileAccessLogs
+      .filter(log => log.Details["Number of Files Accessed"] > 20)
+      .map(log => ({
+        user: log.Details.Hostname,
+        type: 'File Access',
+        details: `${log.Details["Number of Files Accessed"]} files accessed in a short period`,
+        date: log.Details.Date,
+        severity: log.Details["Number of Files Accessed"] > 30 ? 'High' : 'Medium'
+      }));
+    
+    const loginAnomalyDetails = logonActivityLogs
+      .filter(log => 
+        (log.Details["No. of Failed Login Attempts"] || 0) > 3 || 
+        (log.Details["No. of Account Lockout Attempts"] || 0) > 0
+      )
+      .map(log => ({
+        user: log.Details.Hostname,
+        type: 'Authentication',
+        details: `${log.Details["No. of Failed Login Attempts"] || 0} failed attempts, ${log.Details["No. of Account Lockout Attempts"] || 0} lockouts`,
+        date: log.Details.Date,
+        severity: (log.Details["No. of Account Lockout Attempts"] || 0) > 0 ? 'Critical' : 'High'
+      }));
+    
+    const networkAnomalyDetails = networkActivityLogs
+      .filter(log => 
+        (log.Details.sentbyte || 0) > 100000 || 
+        (log.Details.rcvdbyte || 0) > 100000
+      )
+      .map(log => ({
+        user: log.Details.user,
+        type: 'Data Transfer',
+        details: `Unusual data transfer: ${((log.Details.sentbyte || 0) + (log.Details.rcvdbyte || 0)).toLocaleString()} bytes`,
+        date: log.Details.date,
+        severity: ((log.Details.sentbyte || 0) + (log.Details.rcvdbyte || 0)) > 150000 ? 'Critical' : 'High'
+      }));
+    
+    const anomalyDetails = [
+      ...fileAnomalyDetails,
+      ...loginAnomalyDetails,
+      ...networkAnomalyDetails
+    ].sort((a, b) => {
+      // Sort by severity first
+      const severityOrder = { 'Critical': 0, 'High': 1, 'Medium': 2, 'Low': 3 };
+      return severityOrder[a.severity as keyof typeof severityOrder] - severityOrder[b.severity as keyof typeof severityOrder];
+    });
+    
     return {
       totalUsers: users.size,
       criticalRisk,
       highRisk,
       mediumRisk,
       lowRisk,
-      topRiskUsers: userTotalRiskScores.slice(0, 5),
+      topRiskUsers: userTotalRiskScores,
       fileAnomalies,
       loginAnomalies,
       networkAnomalies,
-      totalAnomalies: fileAnomalies + loginAnomalies + networkAnomalies
+      totalAnomalies: fileAnomalies + loginAnomalies + networkAnomalies,
+      anomalyDetails
     };
+  };
+
+  const handleInvestigateUser = (user: {user: string, riskScore: number}) => {
+    setSelectedUser(user);
+    setInvestigationModalOpen(true);
   };
 
   const handleGenerateReport = async () => {
@@ -291,6 +355,7 @@ const ReportsPage = () => {
                 <EmailReportForm 
                   reportTitle="Security Log Analysis" 
                   reportType={reportType.charAt(0).toUpperCase() + reportType.slice(1)}
+                  senderEmail="jukualt236@gmail.com"
                 />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -656,6 +721,82 @@ const ReportsPage = () => {
                   </div>
                 </div>
                 
+                {/* Detailed Anomalies Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/20 p-1.5 rounded-md">
+                      <AlertTriangle className="h-5 w-5 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-semibold">Detected Anomalies</h2>
+                  </div>
+                  
+                  <Card>
+                    <CardHeader className="pb-2 border-b border-border/50">
+                      <CardTitle className="text-base">Detailed Security Incidents</CardTitle>
+                      <CardDescription>
+                        {riskStats.anomalyDetails.length} anomalies detected requiring investigation
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <div className="space-y-3">
+                        {riskStats.anomalyDetails.length > 0 ? (
+                          <div className="rounded-lg overflow-hidden border border-border">
+                            <table className="w-full">
+                              <thead className="bg-background/30">
+                                <tr>
+                                  <th className="text-left px-4 py-2 text-sm font-medium text-muted-foreground">User</th>
+                                  <th className="text-left px-4 py-2 text-sm font-medium text-muted-foreground">Type</th>
+                                  <th className="text-left px-4 py-2 text-sm font-medium text-muted-foreground">Details</th>
+                                  <th className="text-left px-4 py-2 text-sm font-medium text-muted-foreground">Date</th>
+                                  <th className="text-left px-4 py-2 text-sm font-medium text-muted-foreground">Severity</th>
+                                  <th className="text-right px-4 py-2 text-sm font-medium text-muted-foreground">Action</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-border/30">
+                                {riskStats.anomalyDetails.slice(0, 8).map((anomaly, idx) => (
+                                  <tr key={idx} className="hover:bg-background/40">
+                                    <td className="px-4 py-3 text-sm">{anomaly.user}</td>
+                                    <td className="px-4 py-3 text-sm">{anomaly.type}</td>
+                                    <td className="px-4 py-3 text-sm">{anomaly.details}</td>
+                                    <td className="px-4 py-3 text-sm">{anomaly.date}</td>
+                                    <td className="px-4 py-3 text-sm">
+                                      <span className={`px-2 py-1 rounded-full text-xs ${
+                                        anomaly.severity === 'Critical' ? 'bg-red-900/30 text-red-400' :
+                                        anomaly.severity === 'High' ? 'bg-orange-900/30 text-orange-400' : 
+                                        'bg-amber-900/30 text-amber-400'
+                                      }`}>
+                                        {anomaly.severity}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-7 text-xs"
+                                        onClick={() => handleInvestigateUser({ user: anomaly.user, riskScore: 0.8 })}
+                                      >
+                                        Investigate
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <CheckCircle2 className="h-16 w-16 text-green-500 mb-3" />
+                            <p className="text-lg font-medium">No anomalies detected</p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              All user activities are within normal operational parameters
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
                 {/* High Risk Users Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
@@ -694,11 +835,16 @@ const ReportsPage = () => {
                                         user.riskScore > 0.4 ? 'bg-amber-900/30 text-amber-400' :
                                         'bg-green-900/30 text-green-400'
                                       }`}>
-                                        Risk Score: {user.riskScore.toFixed(2)}
+                                        Risk Score: {Math.round(user.riskScore * 100)}%
                                       </span>
                                     </div>
                                   </div>
-                                  <Button size="sm" variant="outline" className="h-7">
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="h-7"
+                                    onClick={() => handleInvestigateUser(user)}
+                                  >
                                     Investigate
                                   </Button>
                                 </div>
@@ -719,10 +865,58 @@ const ReportsPage = () => {
                                 />
                               </div>
                             </div>
+                            
+                            {/* User Risk Factors */}
+                            <div className="pl-11 grid grid-cols-3 gap-2 mt-1">
+                              <div className="p-2 rounded bg-card/50 border border-border/30">
+                                <div className="text-xs text-muted-foreground">File Access</div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-medium">{Math.round(user.scores?.fileAccess * 100 || 0)}%</span>
+                                  <div className="w-16 h-1 rounded-full bg-background overflow-hidden">
+                                    <div 
+                                      className="h-full bg-purple-500" 
+                                      style={{width: `${(user.scores?.fileAccess || 0) * 100}%`}}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="p-2 rounded bg-card/50 border border-border/30">
+                                <div className="text-xs text-muted-foreground">Authentication</div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-medium">{Math.round(user.scores?.logon * 100 || 0)}%</span>
+                                  <div className="w-16 h-1 rounded-full bg-background overflow-hidden">
+                                    <div 
+                                      className="h-full bg-red-500" 
+                                      style={{width: `${(user.scores?.logon || 0) * 100}%`}}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="p-2 rounded bg-card/50 border border-border/30">
+                                <div className="text-xs text-muted-foreground">Network</div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-medium">{Math.round(user.scores?.network * 100 || 0)}%</span>
+                                  <div className="w-16 h-1 rounded-full bg-background overflow-hidden">
+                                    <div 
+                                      className="h-full bg-blue-500" 
+                                      style={{width: `${(user.scores?.network || 0) * 100}%`}}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
                     </CardContent>
+                    <CardFooter className="bg-card/30 border-t border-border/30 flex justify-end">
+                      <Button variant="ghost" size="sm" className="text-xs flex items-center gap-1">
+                        <span>View all high risk users</span>
+                        <ArrowRight size={12} />
+                      </Button>
+                    </CardFooter>
                   </Card>
                 </div>
               </div>
@@ -747,6 +941,15 @@ const ReportsPage = () => {
             </TabsContent>
           </Tabs>
         </div>
+        
+        <UserInvestigationModal 
+          open={investigationModalOpen}
+          onOpenChange={setInvestigationModalOpen}
+          userData={selectedUser}
+          networkActivityLogs={networkActivityLogs}
+          fileAccessLogs={fileAccessLogs}
+          logonActivityLogs={logonActivityLogs}
+        />
       </DashboardLayout>
     </>
   );
