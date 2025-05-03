@@ -35,6 +35,45 @@ const riskLevels = {
   "KunalG": "High"
 };
 
+// Risk calculation based on provided formula
+export function calculateRiskScore(fileAccessScore: number, logonActivityScore: number, networkActivityScore: number): number {
+  const s1 = fileAccessScore || 0;
+  const s2 = logonActivityScore || 0;
+  const s3 = networkActivityScore || 0;
+  
+  // Risk_Score = 38.36454020555577*s1[-0.03249382] + s2[0.05180103] + s3[0.18216909]
+  let score = 38.36454020555577 * Math.pow(s1, -0.03249382);
+  score += Math.pow(s2, 0.05180103);
+  score += Math.pow(s3, 0.18216909);
+  
+  // Normalize to 0-1 range
+  return Math.min(Math.max(score / 50, 0), 1);
+}
+
+// Calculate risk score components for each type of activity
+export function calculateFileAccessRiskScore(logEntry: FileAccessLog): number {
+  const fileCount = logEntry.Details["Number of Files Accessed"] || 0;
+  // Higher file access counts lead to higher risk
+  return Math.min(fileCount / 30, 1); // Normalize to 0-1, with 30+ files being max risk
+}
+
+export function calculateLogonRiskScore(logEntry: LogonActivityLog): number {
+  const failedLogins = logEntry.Details["No. of Failed Login Attempts"] || 0;
+  const accountLockouts = logEntry.Details["No. of Account Lockout Attempts"] || 0;
+  
+  // Failed logins and lockouts heavily increase risk
+  return Math.min((failedLogins * 0.2) + (accountLockouts * 0.6), 1);
+}
+
+export function calculateNetworkRiskScore(logEntry: NetworkActivityLog): number {
+  const sentBytes = logEntry.Details.sentbyte || 0;
+  const rcvdBytes = logEntry.Details.rcvdbyte || 0;
+  const totalBytes = sentBytes + rcvdBytes;
+  
+  // Large data transfers indicate higher risk
+  return Math.min(totalBytes / 200000, 1); // 200KB+ is max risk
+}
+
 // Convert the raw logs to the format expected by our application
 function convertFileAccessLogs(rawLogs: any[]): FileAccessLog[] {
   return rawLogs.map(log => ({

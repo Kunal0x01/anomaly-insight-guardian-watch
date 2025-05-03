@@ -15,16 +15,20 @@ interface UserRiskFactorsProps {
   userName: string;
   factors: RiskFactor[];
   className?: string;
+  overallRiskScore?: number;
 }
 
 const UserRiskFactors: React.FC<UserRiskFactorsProps> = ({
   userId,
   userName,
   factors,
-  className
+  className,
+  overallRiskScore
 }) => {
-  // Calculate total risk score
-  const totalRiskScore = factors.reduce((total, factor) => total + (factor.weight * factor.score), 0);
+  // Calculate total risk score based on formula if not provided
+  const totalRiskScore = overallRiskScore !== undefined ? 
+    overallRiskScore : 
+    factors.reduce((total, factor) => total + (factor.weight * factor.score), 0);
   
   // Get color based on score
   const getScoreColor = (score: number) => {
@@ -89,16 +93,15 @@ const UserRiskFactors: React.FC<UserRiskFactorsProps> = ({
         <div className="mt-4 p-3 border border-border/30 rounded-md bg-secondary/20">
           <h4 className="text-sm font-medium mb-2">Risk Calculation Formula</h4>
           <p className="text-xs text-muted-foreground">
-            Overall Risk = Σ(Factor Score × Factor Weight)
+            Risk_Score = 38.36454020555577*s1[-0.03249382] + s2[0.05180103] + s3[0.18216909]
           </p>
           <div className="text-xs text-muted-foreground mt-1">
-            {factors.map((factor, index) => (
-              <span key={index}>
-                {factor.factor} ({(factor.score * 100).toFixed(0)}% × {(factor.weight * 100).toFixed(0)}%)
-                {index < factors.length - 1 ? " + " : ""}
-              </span>
-            ))}
-            {" = "}<span className={getScoreColor(totalRiskScore)}>{(totalRiskScore * 100).toFixed(0)}%</span>
+            Where:
+            <ul className="list-disc pl-4 mt-1">
+              <li>s1: Score of File Access</li>
+              <li>s2: Score of Logon Activity</li>
+              <li>s3: Score of Network Activity</li>
+            </ul>
           </div>
         </div>
       </CardContent>
